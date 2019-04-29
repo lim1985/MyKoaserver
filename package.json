@@ -1,0 +1,25 @@
+{
+  "name": "koa2",
+  "version": "1.0.0",
+  "description": "lim sendsms",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "koa": "^2.6.2",
+    "koa-bodyparser": "^4.2.1",
+    "koa-cors": "0.0.16",
+    "koa-router": "^7.4.0",
+    "koa-jwt": "3.2.2",
+    "koa-static": "3.0.0",
+    "md5": "^2.2.1",
+    "sequelize": "^4.41.2",
+    "tedious": "^3.0.1",
+    "bcryptjs": "2.4.3",
+    "jsonwebtoken": "7.4.1"
+  }
+}

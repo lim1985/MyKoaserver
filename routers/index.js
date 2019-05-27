@@ -30,8 +30,7 @@ router
   .post('/adminroladd',AdminRolesController.addAdminRoles)
   .get('/admininfo',AdminRolesController.GetAdminRolesPermission)
   .get('/GetrolesbyAdminID',AdminRolesController.GetroleslistbyAdminID)
-
-
+  .get('/GetAllRolesDepIDPermission',AdminRolesController.GetAdminRolesPermissionDepID)
   
     //PermissionController
   .get('/PermissionAdd',PermissionController.AddPermission)
@@ -52,11 +51,20 @@ router
   
   
   //phoneUser通讯录接口
+  .post('/asyncValidateTel',UserPhonelistController.ValidateTel)
+  .post('/UpdatePhoneUser',UserPhonelistController.UpdateUserPhoneinformation)
   .post('/AddPhoneUser',UserPhonelistController.AdduserPhones)
-  .get('/AllPhoneUser',UserPhonelistController.GetAllUserPhoneList)
+  .get('/AllPhoneUserByPermissionkey',UserPhonelistController.GetAllUserPhoneListByPermissionKey)
+  .get('/GetDepIDAndPermissionKey',UserPhonelistController.GetByDepIDAndPermissionKey)
+  .get('/GetAllPhoneuser',UserPhonelistController.GetAllPhoneuser)
+  .get('/GetAllByDepID',UserPhonelistController.GetAllByDepID)
+  
+
+  
 //获取路由表
   .get('/getRouteByAdmin',UserController.GetRouteByAdminID)
   .get('/getAllPermissAndDeplist',UserController.GetPermissionAndDeplist)
+  .get('/getAllDepTreeList',UserController.GetDepTreeList)
   .get('/GetAllPermissionInformationByRolesID',PermissionController.SelectPermissionInformationByRoleID)
 
   

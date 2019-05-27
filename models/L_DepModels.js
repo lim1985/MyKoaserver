@@ -79,7 +79,22 @@ class DepartmentModel {
     resolve(res)
   })
 }
-  
+  /**
+ * 
+ * @param {ctx} s 
+ * @return Dep
+ */
+static async select_DepartmentByUploadDir(s)
+{    
+
+      const DepartmentInfo = await DEP.findOne({
+        where: {
+          UploadDir:s
+        }
+      })
+      return DepartmentInfo
+   
+}
 /**
  * 
  * @param {ctx} s 
@@ -147,13 +162,13 @@ static async selectAll_DepartmentByPermission_Key(s,roleid)
         attributes: [
          Sequelize.col('DepInformation.IsParent'),
          Sequelize.col('DepInformation.IsView'),
-         Sequelize.col('DepInformation.IsEdit'),
-            
+         Sequelize.col('DepInformation.IsEdit'),        
         'Abbreviation' ,
         // ['DepartmentId','DepID'],
         // ['Permission_Key','Permissionkey'],
         'DepartmentId',
-        'Permission_Key'
+        'Permission_Key',
+        'UploadDir'
         
       ],
         where: {
@@ -178,34 +193,6 @@ static async selectAll_DepartmentByPermission_Key(s,roleid)
       }).then(res=>{
         
         resolve(res)
-      
-      // .then(res=>{
-
-      //  let obj= res.rows.map(s=>{
-      
-      //     return {
-      //       label:s.Abbreviation,
-      //       DepID:s.DepartmentId,
-      //       DepartmentName:s.DepartmentName,
-      //       ParentDepartmentId:s.ParentDepartmentId,
-      //       Permission_Key:s.Permission_Key,
-      //       Priority:s.Priority,
-      //       UploadDir:s.UploadDir,
-      //       depinfor:depinfor
-      //     }
-      //   })
-              // let Depinformation=Perinformation.findOne(res.rows[x].DepartmentId)
-    
-        // Abbreviation
-        // DepartmentId     
-        // DepartmentName      
-        // ParentDepartmentId     
-        // Permission_Key     
-        // Priority      
-        // UploadDir
-    
-
-        
       })
     } catch (error) {
       reject(error)

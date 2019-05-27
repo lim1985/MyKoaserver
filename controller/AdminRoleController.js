@@ -2,6 +2,7 @@ const AdminRolesModel = require('../models/L_AdminRoles')
 const userModel = require('../models/userModels')
 const RolesModel = require('../models/L_RolesModels')
 const PermissionModel = require('../models/L_PermissionModels')
+const DepModel = require('../models/L_DepModels')
 // const jwt = require('jsonwebtoken')
 // const secret = require('../config/secret.json')
 // const bcrypt = require('bcryptjs')
@@ -12,7 +13,7 @@ class RolesController {
  {
     const iid=ctx.request.query.AdminID
     const userinfo=await userModel.findUserByAminID(iid)
-    console.log(userinfo)
+    // console.log(userinfo)
     if(!userinfo)
     {
         ctx.body={
@@ -22,21 +23,160 @@ class RolesController {
     else
     {
         const roles= userinfo.dataValues.RolesID.split('|')
+        console.log(roles)
         ctx.body={
             code:1,
             roles:roles
         }
-    }
-    // if(!userinfo.dataValues.RolesID)
-    // {
-    //     ctx.body={
-    //         code:-1
-    //     }
-    // }
-    // const roles= userinfo.dataValues.RolesID.split('|')
-    
- 
+   }
  }
+/**
+ * 
+ * @param {adminID} ctx 
+ * return {Promise}
+ */
+static async GetAdminRolesPermissionDepID(ctx)
+{
+    const iid=ctx.request.query.AdminID
+    const permissions=[]
+      let PermissList={}
+    const PermissionList=[]
+    const userinfo=await userModel.findUserByAminID(iid)
+    const roles= userinfo.dataValues.RolesID.split('|')
+    const _arr=[]   
+    for (let i in roles)
+    {   
+        let _PermissionsArr=await PermissionModel.SelectByRoleID(roles[i]) 
+              
+                    for(let x in _PermissionsArr)
+                    {
+                         let obj=new Object();
+                         obj.DepID=_PermissionsArr[x].DepID,
+                         obj.IsEdit=_PermissionsArr[x].IsEdit,
+                         obj.IsParent=_PermissionsArr[x].IsParent,
+                         obj.IsView=_PermissionsArr[x].IsView,
+                         obj.RoleID=_PermissionsArr[x].RoleID,
+                         obj.value=_PermissionsArr[x].PermissionKey
+                         obj.label=_PermissionsArr[x].Permission_name                       
+                        if(_PermissionsArr[x].IsParent)
+                        {
+                            let _depArr=await DepModel.selectAll_DepartmentByPermission_Key(_PermissionsArr[x].PermissionKey,_PermissionsArr[x].RoleID)                              
+                            obj.actionOptions=_depArr.rows
+                        }                    
+                            let _permissArr=await  PermissionModel.findIDByPermissionName(_PermissionsArr[x].PermissionKey)
+                            let _DepList= await DepModel.select_DepartmentByUploadDir(_PermissionsArr[x].PermissionKey)
+                            obj.label=_permissArr.Permission_name
+                            if(_permissArr)
+                            {
+                                obj.label=_permissArr.Permission_name
+                            } else if (_DepList)
+                            {
+                                obj.label=_DepList.DepartmentName  
+                            }
+                        _arr.push(obj)    
+                    }  
+    }
+   
+     _arr.forEach(v => {
+        // PermissionList.push(v)
+            if(v.IsView && v.IsParent)
+            {
+                PermissionList.push(v.value)  
+                v.actionOptions.forEach(s=>{   
+                    if(s.IsView)
+                    {
+                        PermissionList.push(s.UploadDir)
+                    }      
+                })                            
+            }     
+        });
+        var r = PermissionList.filter(function(e,index,self){//数组去重
+            return self.indexOf(e) === index;
+         });
+          
+         for(let x in r)
+         {
+             let _obj=new Object();
+             let PermissList= await PermissionModel.findIDByPermissionName(r[x].toString())
+             let DepList= await DepModel.select_DepartmentByUploadDir(r[x].toString())
+                if(PermissList)
+                {
+                    _obj.roleId=roles[0],
+                    _obj.permissionId=PermissList.Permission_key,
+                    _obj.permissionName=PermissList.Permission_name,
+                    _obj.actions='[{\"action\":\"add\",\"defaultCheck\":false,\"describe\":\"新增\"},{\"action\":\"query\",\"defaultCheck\":false,\"describe\":\"查询\"},{\"action\":\"get\",\"defaultCheck\":false,\"describe\":\"详情\"},{\"action\":\"update\",\"defaultCheck\":false,\"describe\":\"修改\"},{\"action\":\"delete\",\"defaultCheck\":false,\"describe\":\"删除\"}]',
+                    _obj.actionEntitySet=[{
+                        "action": "add",
+                        "describe": "新增",
+                        "defaultCheck": false
+                    },
+                    {
+                        "action": "query",
+                        "describe": "查询",
+                        "defaultCheck": false
+                    }]
+                    permissions.push(_obj)   
+                } else if(DepList)
+                {
+                    _obj.roleId=roles[0],
+                    _obj.permissionId=DepList.UploadDir,
+                    _obj.permissionName=DepList.DepartmentName,
+                    _obj.actions='[{\"action\":\"add\",\"defaultCheck\":false,\"describe\":\"新增\"},{\"action\":\"query\",\"defaultCheck\":false,\"describe\":\"查询\"},{\"action\":\"get\",\"defaultCheck\":false,\"describe\":\"详情\"},{\"action\":\"update\",\"defaultCheck\":false,\"describe\":\"修改\"},{\"action\":\"delete\",\"defaultCheck\":false,\"describe\":\"删除\"}]',
+                    _obj.actionEntitySet=[{
+                        "action": "add",
+                        "describe": "新增",
+                        "defaultCheck": false
+                    },
+                    {
+                        "action": "query",
+                        "describe": "查询",
+                        "defaultCheck": false
+                    }]
+                    permissions.push(_obj)  
+                }     
+         }
+         const roleslist={}
+         for (let x in roles)
+         {
+             const _temproles=await RolesModel.findroleByRoleid(roles[x])
+             roleslist.id=_temproles.dataValues.roleid
+             roleslist.name=_temproles.dataValues.rolevalue
+             roleslist.describe=_temproles.dataValues.roledescription
+             roleslist.status=_temproles.dataValues.static
+             roleslist.creatorId=_temproles.dataValues.rolekey
+             roleslist.createTime=_temproles.dataValues.addtime
+             roleslist.permissionList=r
+             roleslist.permissions=permissions            
+         }
+         let user={
+            id:userinfo.dataValues.AdminID,
+            name:userinfo.dataValues.AdminName,
+            username:userinfo.dataValues.UserName,
+            password:'',
+            avatar: "/avatar2.jpg",
+            status: userinfo.dataValues.IsLock? 1:0,
+            telephone: "",
+            lastLoginIp:userinfo.dataValues.LastLoginIP,
+            lastLoginTime:userinfo.dataValues.LastLoginTime,
+            LastLogoutTime:userinfo.dataValues.LastLogoutTime,
+            merchantCode:userinfo.dataValues.Hash,
+            deleted: 0,
+            roleId: userinfo.dataValues.UserName,
+            role:roleslist,
+            createTime: 1497160610259,
+            creatorId: "admin"
+  
+        }
+ 
+
+    ctx.body={
+        message:'',
+        result:user,
+        status: 200,
+        timestamp: 1534844188679
+    } 
+}
+
 
  /**
    * 获取管理员角色和权限
@@ -53,6 +193,7 @@ class RolesController {
         //console.log(iid)
         const userinfo=await userModel.findUserByAminID(iid)
         const roles= userinfo.dataValues.RolesID.split('|')
+        console.log(roles)
         let roleID=''
            // console.log(roles)
         // const result= await PermissionModel.findIDByPermissionName('QW')
@@ -65,15 +206,15 @@ class RolesController {
              let role=arr.dataValues.rolekey    
              roleID=role      
             }           
-            var arr=s.split('|')
-            for(let i in arr)//数组去无值元素
+            var _arr=s.split('|')
+            for(let i in _arr)//数组去无值元素
             {
-                if(arr[i]==''||arr[i]==undefined)
+                if(_arr[i]==''||_arr[i]==undefined)
                 {
-                    arr.splice(i,1);
+                    _arr.splice(i,1);
                 }
             }
-            var r = arr.filter(function(e,index,self){//数组去重
+            var r = _arr.filter(function(e,index,self){//数组去重
                    return self.indexOf(e) === index;
                 });
               
@@ -163,49 +304,14 @@ class RolesController {
       }
        
      //  console.log(roles)
-        const result={
-            message:'',
-            result:user,
-            status: 200,
-            timestamp: 1534844188679
           
-            
-        }
-       
         ctx.body={
             message:'',
             result:user,
             status: 200,
             timestamp: 1534844188679
         }
-        // try{
-        //  userModel.findUserByAminID(iid).then(res=>{
-        //      console.log(res.dataValues)
-        //    ctx.body={
-        //        result:res.dataValues
-        //    }
-        //  })
-         
-        // }catch(error)
-        // {
-        //    ctx.body={
-        //        err:error
-        //    }
-        // }
-        // try {     
-        //     userModel.findUserByAminID(data,{where:{ID:data.ID}}).then(res=>
-        //     {
-        //       console.log(res)
-        //       resove(res)
-        //     }).catch(function(reject)
-        //     {
-        //       console.log(reject)
-        //       return reject()
-        //     })
-        // } catch (error) {
-        //   reject(error)
-        // }
-    
+      
   
 }
 

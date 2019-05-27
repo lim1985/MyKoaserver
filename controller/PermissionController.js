@@ -13,10 +13,9 @@ static async SelectPermissionInformationByRoleID(ctx)
 {
     let data=ctx.request.query
     let ID=data.ID        
-    let arr=[]
-   
+    let arr=[]   
     let _PermissionsArr=await PermissionModel.SelectByRoleID(ID) 
-
+            console.log(_PermissionsArr)
                 for(let x in _PermissionsArr)
                 {
                      let obj=new Object();
@@ -38,63 +37,13 @@ static async SelectPermissionInformationByRoleID(ctx)
                     }
                    
                         let _permissArr=await  PermissionModel.findIDByPermissionName(_PermissionsArr[x].PermissionKey)
-                        obj.label=_permissArr.Permission_name
-                       
-                   
+                        if(_permissArr)
+                        {
+                            obj.label=_permissArr.Permission_name
+                        }                        
                     arr.push(obj)
 
                 }
-                
-
-
-  //开始
-        // for(let x in _PermissionsArr)
-        // {
-        //  let obj=new Object()  
-        //     obj.DepID=_PermissionsArr[x].DepID
-        //     obj.IsEdit=_PermissionsArr[x].IsEdit
-        //     obj.IsParent=_PermissionsArr[x].IsParent
-        //     obj.IsView=_PermissionsArr[x].IsView
-        //     obj.PermissionKey=_PermissionsArr[x].PermissionKey
-        //     obj.RoleID=_PermissionsArr[x].RoleID 
-        //     if(_PermissionsArr[x].PermissionKey)
-        //     {
-        //         let _permissArr=await  PermissionModel.findIDByPermissionName(_PermissionsArr[x].PermissionKey)
-        //         obj.PermissionName=_permissArr.Permission_name
-        //         obj.description=_permissArr.description
-               
-        //         obj.OrderID=_permissArr.OrderID
-        //     } 
-        //      if(_PermissionsArr[x].DepID)
-        //     {            
-             
-        //         let _depArr=await DepModel.findOne_DepartmentByDepartmentID(_PermissionsArr[x].DepID)              
-        //         obj.depname=_depArr.Abbreviation
-        //         obj.UploadDir=_depArr.UploadDir
-        //         obj.Priority=_depArr.Priority
-        //     }
-        //     arr.push(obj)
-        // }
-        //结束
-//    arr= _PermissionsArr.map(s=>{  
-       
-//    let deplist=DepModel.findOne_DepartmentByDepartmentID(s.DepID).then(res=>{
-//         return res
-//      })  
-//      obj={
-//         RoleID:s.RoleID,
-//         PermissionKey:s.PermissionKey,
-//         IsEdit:s.IsEdit,
-//         IsParent:s.IsParent,
-//         IsView:s.IsView     
-//     } 
-//     if(s.DepID)
-//     {        
-//        obj.Depname=deplist
-//     }
-  
-//        return  obj
-//     })
     console.log(arr)
     ctx.body={
         res:arr,

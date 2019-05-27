@@ -154,7 +154,8 @@ static async QueryFindCountAllDEP(ctx)
 
     static  async GetDepartmentByID(ctx)
     {
-        const data=ctx.request.query     
+        const data=ctx.request.query  
+        console.log(data.ID)   
         const result=await DepModel.findOne_DepartmentByDepartmentID(data.ID)
         console.log(result);
         if(!result)

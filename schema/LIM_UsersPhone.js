@@ -7,11 +7,19 @@ module.exports = function(sequelize, DataTypes) {
             allowNull:false,          
             primaryKey: true,
             autoIncrement: true
+      },      
+      status:{
+        type: DataTypes.INTEGER,
+        allowNull: true
       },
       GroupID:{
         type: DataTypes.INTEGER,
         allowNull: true
       },
+      Email:{
+        type:DataTypes.STRING,
+          allowNull:true
+        },  
       UserName:{
         type:DataTypes.STRING,
           allowNull:true

@@ -1,6 +1,7 @@
 const RolesModel = require('../models/L_RolesModels')
 
 const PermissionModel = require('../models/L_PermissionModels')
+const DepModel = require('../models/L_DepModels')
 
 
 
@@ -21,14 +22,24 @@ class RolesController {
         const res=ctx.request.query
         const ID=res.ID
         console.log(ID)
-        const result=await RolesModel.findroleByRoleid(ID)
-            // console.log(result)
-            if(result)
+      
+        let arr=[] 
+      
+        let _PermissionsArr=await PermissionModel.SelectByRoleID(ID) 
+     
+      
+        _PermissionsArr.forEach(v => {
+       
+            // console.log(v)
+            if(v.IsView)
             {
-                ctx.body={
-                    result:result.PremissionValue
-                }
+                arr.push(v.PermissionKey)
             }
+        });
+                ctx.body={
+                    result:arr
+                }
+           
     }
     /**
      * 给角色添加权限列表

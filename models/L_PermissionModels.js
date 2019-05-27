@@ -270,7 +270,8 @@ static async SelectByRoleID(data)
   const Permissionlist=  await Permission.findAndCountAll(
     ctx,
     //{ offset: 0, limit: 10 },
-     {
+     
+     {    
       order:Permission.addtime
      }
     )

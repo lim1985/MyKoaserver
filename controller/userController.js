@@ -195,6 +195,56 @@ class UserController {
               }
             }
       }
+      static async GetDepTreeList(ctx)
+      {
+         
+           let Permissionarr=[]
+           const res=ctx.request.query      
+           const pageNo=res.pageNo       
+           const pageSize=res.pageSize
+           const offset=(pageNo-1) * pageSize   
+           const limit=pageSize * 1
+           const Permissionlist=await PermissionModel.findPermiss({ offset:offset,limit: limit })        
+           for(let x in Permissionlist.rows)
+           {
+            // console.log(Permissionlist.rows[x].Permission_key)    
+            const obj=new Object();               
+            const _DepArr=[]  
+            // console.log(r[i])
+             const Permissioninfo=await PermissionModel.findIDByPermissionName(Permissionlist.rows[x].Permission_key)    
+             const DEPlist=await DepModel.selectAll_DepartmentByPermission_Key(Permissioninfo.dataValues.Permission_key,Permissioninfo.dataValues.OrderID)
+             DEPlist.rows.forEach(v => {
+               console.log(v)
+                const objDep=new Object() 
+                objDep.DepartmentName=v.DepartmentName
+                objDep.key=v.DepartmentId
+                obj.icon=""
+                objDep.Permission_Key=v.Permission_Key
+                objDep.UploadDir=v.UploadDir
+                objDep.title=v.Abbreviation
+                objDep.Priority=v.Priority                
+                  // console.log(v.DepartmentName)
+                  _DepArr.push(objDep)               
+              });
+            // console.log(Permissioninfo)
+            // console.log(_DepArr)
+          
+              obj.key=Permissioninfo.dataValues.Permission_key
+              obj.icon=""
+              obj.description=Permissioninfo.dataValues.description
+              obj.title=Permissioninfo.dataValues.Permission_name
+              obj.OrderID=Permissioninfo.dataValues.OrderID
+              obj.children=_DepArr
+              Permissionarr.push(obj)
+            
+         
+           }         
+           ctx.body={
+             result:Permissionarr,
+            
+
+           }
+      }
 
       
       static async GetPermissionAndDeplist(ctx)
@@ -230,6 +280,7 @@ class UserController {
             // console.log(Permissioninfo)
             // console.log(_DepArr)
             obj.Permission_key=Permissioninfo.dataValues.Permission_key
+            obj.description=Permissioninfo.dataValues.description
             obj.Permission_name=Permissioninfo.dataValues.Permission_name
             obj.OrderID=Permissioninfo.dataValues.OrderID
             obj.children=_DepArr
@@ -245,38 +296,45 @@ class UserController {
    static async GetRouteByAdminID(ctx)
       {
         let id=ctx.request.query.AdminID
+        console.log(id)
         const User=await userModel.findUserByAminID(id)
+        console.log(User)
         let s=''
         let _temp=''
-        let _PermissArr
-     
-        console.log(User.dataValues.AdminName)
-        console.log(User.dataValues.AdminID)
-        console.log(User.dataValues.RolesID)
+        let _PermissArr    
+      
         const roleid=User.dataValues.RolesID
         let _arr=roleid.split("|")
-      
+        console.log(_arr)
         let Permissionarr=[]
           for(let x in _arr)
           {           
+          
            let res=await  RolesModel.findroleByRoleid(_arr[x]) 
+       
+          
            _temp=res.dataValues.PremissionValue
+          //  console.log(_temp)
            s+=_temp+'|'
           //  console.log(res.dataValues.PremissionValue)
           }
           _PermissArr= s.split("|")
-          // console.log(_PermissArr)
+          console.log(`----------`)
+           console.log(_PermissArr)
           var r = _PermissArr.filter(function(element,index,self){//数组去重         
             return self.indexOf(element) === index && element //去无效属性
          })   
-        //  console.log(r)      
-        const DepMember=await DepMemberModel.GetDepmemberByAdminID(id)      
+         console.log(r)      
+         console.log(`----------`)
+        const DepMember=await DepMemberModel.GetDepmemberByAdminID(id)    
+        console.log(DepMember.rows)  
          for(let i in r)
          {
           const obj=new Object();
           obj.AdminID=id
           // console.log(r[i])
-           const Permissioninfo=await PermissionModel.findIDByPermissionName(r[i])    
+           const Permissioninfo=await PermissionModel.findIDByPermissionName(r[i]) 
+           console.log(Permissioninfo)   
           // console.log(Permissioninfo)   
           // const Deplist=await DepModel.selectAll_DepartmentByPermission_Key(Permissioninfo.dataValues.Permission_key)
           obj.Permission_key=Permissioninfo.dataValues.Permission_key

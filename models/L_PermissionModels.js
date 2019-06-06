@@ -154,16 +154,12 @@ static async SelectByRoleID(data)
             
             let ID=data.ID
             let _arr=data.PremissionValue  
-           
-
             let _tempArr=[]           
             _arr.forEach(v=> {    
-              console.log(v.actionOptions) 
-       
+              console.log(v.actionOptions)        
               //  console.log(v.actionOptions && v.actionOptions.length )
              if(v.actionOptions.length>0)
-             {              
-              
+             {                            
                v.actionOptions.forEach(A=>{
                 var childrenValue = {
                   RoleID:ID,
@@ -175,8 +171,7 @@ static async SelectByRoleID(data)
               　};
               _tempArr.push(childrenValue)
                })
-             }
-           
+             }           
               var value = {
                 RoleID:ID,
                 PermissionKey:v.value,
@@ -187,8 +182,7 @@ static async SelectByRoleID(data)
               _tempArr.push(value)
          });
             // console.log(_tempArr)
-                  // array.forEach(b => {
-                    
+                  // array.forEach(b => {                    
                   // });
                   //根据传上来的ROLEID 搜索结果，获得总数，然后进行判断，如果count为0 说明该角色下并没有权限内容，即用批量插入功能写入
                   //否则 先删除原有的该roleid的所有数据，再将新值插入到库
@@ -198,8 +192,7 @@ static async SelectByRoleID(data)
                       RoleID: ID                   
                     }
                   }).then( res=>{
-                    let count=res.count
-                   
+                    let count=res.count                   
                     if(count<=0){
                      Perinformation.bulkCreate(_tempArr).then(res=>{
                       resolve(res)    

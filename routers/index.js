@@ -5,6 +5,7 @@ const AdminRolesController = require('../controller/AdminRoleController')
 const PermissionController = require('../controller/PermissionController')
 const DepartmentController = require('../controller/DepController')
 const UserPhonelistController = require('../controller/userPhoneController')
+const ReferenceUserController = require('../controller/ReferenceUserController')
 
 
 // const ListController = require('../controllers/list')
@@ -56,6 +57,8 @@ router
   .post('/AddPhoneUser',UserPhonelistController.AdduserPhones)
   .get('/AllPhoneUserByPermissionkey',UserPhonelistController.GetAllUserPhoneListByPermissionKey)
   .get('/GetDepIDAndPermissionKey',UserPhonelistController.GetByDepIDAndPermissionKey)
+  .post('/PostDepIDAndPermissionKey',UserPhonelistController.PostByDepIDAndPermissionKey)
+  
   .get('/GetAllPhoneuser',UserPhonelistController.GetAllPhoneuser)
   .get('/GetAllByDepID',UserPhonelistController.GetAllByDepID)
   
@@ -66,6 +69,8 @@ router
   .get('/getAllPermissAndDeplist',UserController.GetPermissionAndDeplist)
   .get('/getAllDepTreeList',UserController.GetDepTreeList)
   .get('/GetAllPermissionInformationByRolesID',PermissionController.SelectPermissionInformationByRoleID)
+//引用表
+  .get('/ReferenceAdd',ReferenceUserController.Add)
 
   
 //   .get('/myuserInfo', UserController.myUserInfoGet) // 获取用户信息

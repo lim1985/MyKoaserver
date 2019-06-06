@@ -1,6 +1,7 @@
 const db = require('../config/db')
 const gov = db.gov
 const UsersPhone = gov.import('../schema/LIM_UsersPhone.js')
+const ResferenceUserPhoneAndDEP = gov.import('../schema/LIM_ResferenceAndDep.js')
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op
 
@@ -19,6 +20,74 @@ class UsersPhoneModel {
 //     })
 //     return userInfo
 //   }
+/**
+ * 查询部门用户按部门ID查找,加入被引用的用户
+ * @param {depid} s 
+ * @returns {Promise.<*>}
+ */
+static async GetAllPhoneUserReferencUserByDepID(s)
+{
+      
+ let sql=`SELECT  LIM_ResferenceAndDep.status AS Rstatus, LIM_UsersPhone.ID, LIM_UsersPhone.UserName, LIM_UsersPhone.Tel, 
+ LIM_UsersPhone.H_Tel, LIM_UsersPhone.cellphone, LIM_UsersPhone.H_cellphone, LIM_UsersPhone.QQ, 
+ LIM_UsersPhone.avatar, LIM_UsersPhone.BirthDay, LIM_UsersPhone.Type, LIM_UsersPhone.OrderID, 
+ LIM_UsersPhone.Sex, LIM_UsersPhone.GroupID, LIM_UsersPhone.Department_ID, LIM_UsersPhone.Permission_Key, 
+ LIM_UsersPhone.inTime, LIM_UsersPhone.status AS Ustatus, LIM_UsersPhone.UJOB, LIM_UsersPhone.Email, 
+ LIM_UsersPhone.Py_Index, LIM_Department_1.DepartmentName, 
+ LIM_Department_1.Permission_Key AS Permissionkey
+FROM      LIM_UsersPhone INNER JOIN
+ LIM_ResferenceAndDep ON LIM_UsersPhone.ID = LIM_ResferenceAndDep.UserPhoneID INNER JOIN
+ LIM_Department ON LIM_ResferenceAndDep.DepID = LIM_Department.DepartmentId INNER JOIN
+ LIM_Department AS LIM_Department_1 ON LIM_UsersPhone.Department_ID = LIM_Department_1.DepartmentId
+WHERE   (LIM_Department.DepartmentId = ${s.depid})`
+let count =`SELECT  count(*) AS [count]
+FROM      LIM_UsersPhone INNER JOIN
+                LIM_ResferenceAndDep ON LIM_UsersPhone.ID = LIM_ResferenceAndDep.UserPhoneID INNER JOIN
+                LIM_Department ON LIM_ResferenceAndDep.DepID = LIM_Department.DepartmentId INNER JOIN
+                LIM_Department AS LIM_Department_1 ON LIM_UsersPhone.Department_ID = LIM_Department_1.DepartmentId
+WHERE   (LIM_Department.DepartmentId =${s.depid})`
+return new Promise(async(resolve)=>{
+  let res={}
+  res.rows=await gov.query(sql,{type: gov.QueryTypes.SELECT})
+  let c=await gov.query(count,{type: gov.QueryTypes.SELECT})
+  res.count=c[0].count
+  resolve(res)
+}).then(r=>{
+  console.log('返回数据成功！')
+
+  console.log(r)
+  return r
+  
+})
+  
+
+  // let count=` SELECT count([LIM_Department].[DepartmentId]) AS [count] FROM [LIM_Department] AS [LIM_Department]`
+  //   let sql=`SELECT   LIM_Permission.ID, LIM_Permission.RoleID, LIM_Permission.Permission_Key, LIM_Permission.Permission_name, 
+  //   LIM_Permission.description, LIM_Permission.optioncode, LIM_Permission.OrderID, LIM_Department.DepartmentId, 
+  //   LIM_Department.DepartmentName, LIM_Department.Abbreviation, LIM_Department.UploadDir, 
+  //   LIM_Department.ParentDepartmentId, LIM_Department.Priority FROM LIM_Department LEFT OUTER JOIN LIM_Permission ON LIM_Department.Permission_Key = LIM_Permission.Permission_Key ORDER BY LIM_Department.DepartmentId desc`
+  //   return new Promise(async(resolve,reject)=>{
+  //       let res={}
+  //          res.rows=await gov.query(sql,{type : gov.QueryTypes.SELECT})
+  //       let c=await gov.query(count,{type : gov.QueryTypes.SELECT})
+  //       console.log(c[0].count)
+  //          res.count=c[0].count
+  //       console.log(res)
+  //   resolve(res)
+  // })
+
+
+      //  const PhoneUserReferencUserList=await UsersPhone.findAndCountAll(
+      //    {
+      //      where:{          
+      //        Department_ID:s.depid
+      //      },
+      //      order:[
+      //        ['OrderID', 'DESC'],],
+      //    }
+      //  )
+      //  return PhoneUserReferencUserList
+}
 /**
  * 查询部门用户按部门查找
  * @param {depid} s 
@@ -45,12 +114,13 @@ static async GetPhoneUserByDepID(s)
  * @returns {Promise.<*>}
  */
  static async GetPhoneUserByDepIDAndPermissionKey(s)
- {
+ { 
+  //  key: 'QXZ_XT', DepID: 74, status: 9 },
         const PhoneUserList=await UsersPhone.findAndCountAll(
           {
             where:{
               Permission_Key:s.key,
-              Department_ID:s.depid,
+              Department_ID:s.DepID,
               status:s.status
             },
             order:[
@@ -151,9 +221,30 @@ static async GetPhoneUserByDepID(s)
       'OrderID': s.orderid,
       'Sex': s.Sex,
       'status': 9,
-      'Email':''
-      
+      'Email':'',
+      'Py_Index':s.Py_Index      
+    }).then(res=>{
+    
+        let s={
+          ID:res.ID,
+          DepID:res.Department_ID
+         
+        }
+      return s    
+    }).then(res=>{
+      ResferenceUserPhoneAndDEP.create({
+       'UserPhoneID':res.ID,
+       'DepID':res.DepID,
+       'status':-1
+      })      
     })
+     
+      
+    // await ResferenceUserPhoneAndDEP.create({
+    //   DepID
+    //   UserPhoneID
+    //   status
+    // })
     return true
   }
 

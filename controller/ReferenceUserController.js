@@ -1,8 +1,41 @@
-const userPhoneModel = require('../models/L_UsersPhone')
-const DepModel = require('../models/L_DepModels')
+const ReferenceUserPhoneModel = require('../models/L_ReferenceUserModel')
+// const DepModel = require('../models/L_DepModels')
 //
-class UserPhoneController {
+class ReferenceUserController {
+    static async Add(ctx)
+    {
+        const res=ctx.request.query;
+        console.log(res)
+        const IsReference=await ReferenceUserPhoneModel.FindReferencesUserByDepIDUserPhoneID(res);
+            console.log(IsReference);
+                if(!IsReference)
+                {
+                 let result=await ReferenceUserPhoneModel.InertIntoReference(res)
+                    console.log(result)
+                    if(result)
+                    {
+                        ctx.body={
+                            code:1,
+                            msg:'引用成功！'
+                        }
+                    }
+                    else
+                    {
+                        ctx.body={
+                            code:-1,
+                            msg:'引用失败！'
+                        }
+                    }
+                }
+                else
+                {
+                    ctx.body={
+                        code:-4,
+                        msg:'该联系人已经引用过，请不要重复引用'
+                    }
+                }
 
+    }
 
     static async GetAllByDepID(ctx)
     {
@@ -12,8 +45,7 @@ class UserPhoneController {
      const pageSize=res.pageSize
      const offset=(pageNo-1) * pageSize     
      const limit=pageSize * 1
-     const UserPhonelist=await userPhoneModel.GetAllPhoneUserReferencUserByDepID({depid:_depid,offset:offset,limit: limit }) 
-     console.log(UserPhonelist)
+     const UserPhonelist=await userPhoneModel.GetPhoneUserByDepID({depid:_depid,offset:offset,limit: limit }) 
      const result={
          pageNo:pageNo*1,
          pageSize:pageSize*1,
@@ -331,4 +363,4 @@ static async AdduserPhones(ctx)
 
 }
 
-module.exports = UserPhoneController
+module.exports = ReferenceUserController

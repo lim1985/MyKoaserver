@@ -79,6 +79,10 @@ module.exports = function(sequelize, DataTypes) {
       OrderID:{
         type: DataTypes.INTEGER,
         allowNull: true
+      },
+      Py_Index:{
+        type: DataTypes.STRING,
+        allowNull: true
       }
     }, {
     timestamps: false,

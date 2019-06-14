@@ -6,6 +6,8 @@ const PermissionController = require('../controller/PermissionController')
 const DepartmentController = require('../controller/DepController')
 const UserPhonelistController = require('../controller/userPhoneController')
 const ReferenceUserController = require('../controller/ReferenceUserController')
+const CustomGroupController = require('../controller/CustomGroupController')
+
 
 
 // const ListController = require('../controllers/list')
@@ -71,6 +73,13 @@ router
   .get('/GetAllPermissionInformationByRolesID',PermissionController.SelectPermissionInformationByRoleID)
 //引用表
   .get('/ReferenceAdd',ReferenceUserController.Add)
+//customgroup
+  .get('/createGroup',CustomGroupController.CreateGroup)
+  .get('/GetGroup',CustomGroupController.GetcustomGroupByDepID)
+  .get('/GetAllDepUser',CustomGroupController.GetAllAreaDepUserbyAdminID)
+  .post('/adduserTogroup',CustomGroupController.AddUsersToGroup)
+  .get('/InGroupUsersID',CustomGroupController.GetUserByGroupID)
+  .get('/FindAllUserByGroupID',CustomGroupController.FindAllUsersByGroupID)
 
   
 //   .get('/myuserInfo', UserController.myUserInfoGet) // 获取用户信息

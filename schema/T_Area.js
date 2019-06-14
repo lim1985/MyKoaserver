@@ -1,11 +1,11 @@
 /* jshint indent: 2 */
 
 module.exports = function(sequelize, DataTypes) {
-    return sequelize.define('LIM_Area', {
-      ID:{
-          type:DataTypes.INTEGER,
-            allowNull:false,
-            primaryKey: true
+
+    return sequelize.define('T_Area', {
+      AdminID:{
+        type: DataTypes.INTEGER,
+        allowNull: false
       },
       areaname:{
         type: DataTypes.STRING,
@@ -19,9 +19,10 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.INTEGER,
         allowNull: false
       }
+   
     }, {
     timestamps: false,
-    tableName: 'LIM_Area'
+    tableName: 'T_Area'
     });
   };
   //一下这条语句可以查询出 角色 ID 为83 的管理员所能看到的 栏目管理信息 RoleID 关联到管理员ID ，当管理员登陆时就可以根据角色获得所有路由信息

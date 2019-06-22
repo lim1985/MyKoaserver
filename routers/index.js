@@ -59,12 +59,12 @@ router
   .post('/AddPhoneUser',UserPhonelistController.AdduserPhones)
   .get('/AllPhoneUserByPermissionkey',UserPhonelistController.GetAllUserPhoneListByPermissionKey)
   .get('/GetDepIDAndPermissionKey',UserPhonelistController.GetByDepIDAndPermissionKey)
-  .post('/PostDepIDAndPermissionKey',UserPhonelistController.PostByDepIDAndPermissionKey)
-  
+  .post('/PostDepIDAndPermissionKey',UserPhonelistController.PostByDepIDAndPermissionKey)  
   .get('/GetAllPhoneuser',UserPhonelistController.GetAllPhoneuser)
   .get('/GetAllByDepID',UserPhonelistController.GetAllByDepID)
+  .get('/DeleteUser',UserPhonelistController.DeleteUsers)
   
-
+  
   
 //获取路由表
   .get('/getRouteByAdmin',UserController.GetRouteByAdminID)
@@ -73,6 +73,7 @@ router
   .get('/GetAllPermissionInformationByRolesID',PermissionController.SelectPermissionInformationByRoleID)
 //引用表
   .get('/ReferenceAdd',ReferenceUserController.Add)
+  .get('/ReferenceDelete',ReferenceUserController.Delete)
 //customgroup
   .get('/createGroup',CustomGroupController.CreateGroup)
   .get('/GetGroup',CustomGroupController.GetcustomGroupByDepID)
@@ -80,6 +81,8 @@ router
   .post('/adduserTogroup',CustomGroupController.AddUsersToGroup)
   .get('/InGroupUsersID',CustomGroupController.GetUserByGroupID)
   .get('/FindAllUserByGroupID',CustomGroupController.FindAllUsersByGroupID)
+  .get('/DeleteGroupUser',CustomGroupController.DeleteUserByUID)
+  .get('/DeleteGroup',CustomGroupController.DeleteGroupByGroupID)
 
   
 //   .get('/myuserInfo', UserController.myUserInfoGet) // 获取用户信息

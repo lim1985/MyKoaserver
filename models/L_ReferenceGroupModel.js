@@ -9,6 +9,7 @@ const Permission = gov.import('../schema/LIM_Permission')
 const Deps = gov.import('../schema/LIM_Department')
 const UserPhone = gov.import('../schema/LIM_UsersPhone')
 const GroupsUsers = gov.import('../schema/LIM_RefereceGroupAndUserPhone')
+const DEPUsers = gov.import('../schema/LIM_ResferenceAndDep')
 
 // User.belongsToMany(Project, {  as: 'Tasks', through: UserProjects, foreignKey: 'userId' })
 // Project.belongsToMany(User, {  as: 'Workers',through: UserProjects ,foreignKey: 'projectId'})
@@ -30,13 +31,17 @@ const GroupsUsers = gov.import('../schema/LIM_RefereceGroupAndUserPhone')
 // });
 //  CustomGroup.belongsToMany(UserPhone,{foreignKey:'GroupID',sourceKey: 'ID' })
 //  UserPhone.belongsToMany(CustomGroup,{foreignKey:'',sourceKey: 'GroupID' })
-// CustomGroup.belongsToMany(UserPhone, {  as: 'Users',through:GroupsUsers ,foreignKey: 'UserPhoneID' })
-// UserPhone.belongsToMany(CustomGroup, {  as: 'Group',through:GroupsUsers ,foreignKey: 'GroupID'})
+// CustomGroup.belongsToMany(UserPhone, {  through:GroupsUsers ,foreignKey: 'UserPhoneID' })
+// UserPhone.belongsToMany(CustomGroup, {  through:GroupsUsers ,foreignKey: 'GroupID'})
 
 Area.hasMany(Admin,{foreignKey:'AdminID',sourceKey:'AdminID',as:'AD'});//Area和admin 表 1对多
 Area.hasMany(Permission,{foreignKey:'areakey',sourceKey:'areakey',as:'Permission'});//area和Permission 表 1对多
 Permission.hasMany(Deps,{foreignKey:'Permission_Key',sourceKey:'Permission_key',as:'DEP'});//Permission和 Deps 表 1对多
-Deps.hasMany(UserPhone,{foreignKey:'Department_ID',sourceKey:'DepartmentId',as:'Users'});
+// Deps.hasMany(UserPhone,{foreignKey:'Department_ID',sourceKey:'DepartmentId',as:'Users'});
+
+Deps.belongsToMany(UserPhone, {  as: 'Users', through: DEPUsers,sourceKey:'DepartmentId', foreignKey: 'DepID' })
+UserPhone.belongsToMany(Deps, {  as: 'Deps',through: DEPUsers ,sourceKey:'ID', foreignKey: 'UserPhoneID'})
+
 
 // gov.sync().then(function(result){
 //   console.log('同步完成')
@@ -65,12 +70,39 @@ class ReferenceUserModel {
                     LIM_UsersPhone ON LIM_RefereceGroupAndUserPhone.UserPhoneID = LIM_UsersPhone.ID
     WHERE   (LIM_CustomGroup.GroupID ='${s.GroupID}')`
 
-    const sql=`SELECT   LIM_CustomGroup.GroupName, LIM_UsersPhone.UserName, LIM_UsersPhone.*, LIM_CustomGroup.GroupID
-    FROM      LIM_CustomGroup INNER JOIN
-                    LIM_RefereceGroupAndUserPhone ON 
-                    LIM_CustomGroup.GroupID = LIM_RefereceGroupAndUserPhone.GroupID INNER JOIN
-                    LIM_UsersPhone ON LIM_RefereceGroupAndUserPhone.UserPhoneID = LIM_UsersPhone.ID
-    WHERE   (LIM_CustomGroup.GroupID ='${s.GroupID}')`
+    // const sql=`SELECT   LIM_CustomGroup.GroupName, LIM_UsersPhone.UserName, LIM_UsersPhone.*, LIM_CustomGroup.GroupID
+    // FROM      LIM_CustomGroup INNER JOIN
+    //                 LIM_RefereceGroupAndUserPhone ON 
+    //                 LIM_CustomGroup.GroupID = LIM_RefereceGroupAndUserPhone.GroupID INNER JOIN
+    //                 LIM_UsersPhone ON LIM_RefereceGroupAndUserPhone.UserPhoneID = LIM_UsersPhone.ID
+    // WHERE   (LIM_CustomGroup.GroupID ='${s.GroupID}')`
+//     const sql=`SELECT   LIM_CustomGroup.GroupName, LIM_UsersPhone.UserName, LIM_UsersPhone.ID, 
+//     LIM_UsersPhone.UserName AS Expr1, LIM_UsersPhone.Tel, LIM_UsersPhone.H_Tel, LIM_UsersPhone.cellphone, 
+//     LIM_UsersPhone.H_cellphone, LIM_UsersPhone.QQ, LIM_UsersPhone.avatar, LIM_UsersPhone.BirthDay, 
+//     LIM_UsersPhone.Type, LIM_UsersPhone.OrderID, LIM_UsersPhone.Sex, LIM_UsersPhone.GroupID, 
+//     LIM_UsersPhone.Department_ID, LIM_UsersPhone.Permission_Key, LIM_UsersPhone.inTime, LIM_UsersPhone.status, 
+//     LIM_UsersPhone.UJOB, LIM_UsersPhone.Email, LIM_UsersPhone.Py_Index, LIM_CustomGroup.GroupID AS Expr2, 
+//     LIM_Permission.Permission_name
+// FROM      LIM_CustomGroup INNER JOIN
+//     LIM_RefereceGroupAndUserPhone ON 
+//     LIM_CustomGroup.GroupID = LIM_RefereceGroupAndUserPhone.GroupID INNER JOIN
+//     LIM_UsersPhone ON LIM_RefereceGroupAndUserPhone.UserPhoneID = LIM_UsersPhone.ID INNER JOIN
+//     LIM_Permission ON LIM_UsersPhone.Permission_Key = LIM_Permission.Permission_key
+// WHERE   (LIM_CustomGroup.GroupID ='${s.GroupID}')`
+
+const sql=`SELECT   LIM_CustomGroup.GroupName, LIM_UsersPhone.UserName, LIM_UsersPhone.ID, 
+LIM_UsersPhone.UserName AS Expr1, LIM_UsersPhone.Tel, LIM_UsersPhone.H_Tel, LIM_UsersPhone.cellphone, 
+LIM_UsersPhone.H_cellphone, LIM_UsersPhone.QQ, LIM_UsersPhone.avatar, LIM_UsersPhone.BirthDay, 
+LIM_UsersPhone.Type, LIM_UsersPhone.OrderID, LIM_UsersPhone.Sex, LIM_UsersPhone.GroupID, 
+LIM_UsersPhone.Department_ID, LIM_UsersPhone.Permission_Key, LIM_UsersPhone.inTime, LIM_UsersPhone.status, 
+LIM_UsersPhone.UJOB, LIM_UsersPhone.Email, LIM_UsersPhone.Py_Index, LIM_CustomGroup.GroupID, 
+LIM_Department.DepartmentName, LIM_Department.DepartmentId
+FROM      LIM_CustomGroup INNER JOIN
+LIM_RefereceGroupAndUserPhone ON 
+LIM_CustomGroup.GroupID = LIM_RefereceGroupAndUserPhone.GroupID INNER JOIN
+LIM_UsersPhone ON LIM_RefereceGroupAndUserPhone.UserPhoneID = LIM_UsersPhone.ID INNER JOIN
+LIM_Department ON LIM_UsersPhone.Department_ID = LIM_Department.DepartmentId
+WHERE   (LIM_CustomGroup.GroupID ='${s.GroupID}')`
 
 return new Promise(async(resolve,reject)=>{
 let res={}
@@ -79,29 +111,38 @@ let c=await gov.query(count,{type : gov.QueryTypes.SELECT})
 console.log(c[0].count)
 res.count=c[0].count
 console.log(res)
-
-//  let sql=`SELECT   LIM_Permission.*, LIM_Department.DepartmentId, LIM_Department.DepartmentName FROM LIM_Department INNER JOIN
-//  LIM_Permission ON LIM_Department.Permission_Key = LIM_Permission.Permission_key`
-//  let res =await gov.query(sql, {type : gov.QueryTypes.SELECT})
-//  resolve(res)
-//  console.log(res)
-
-// console.log(data)
 resolve(res)
-      // const UserList=await CustomGroup.findAndCountAll({
-      //   as:'Group',
-      //   where:{
-      //     GroupID:'152-QW-CSZ'
-      //   },
-      //   include:[{
-      //     as:'Users',
-      //     model:UserPhone}]
-      // })
-      // console.log(UserList)
-      //   return UserList
   })
   }
-  
+  static async DeleteGroupByGroupID(s)
+  {
+    await GroupsUsers.destroy({
+      where:{
+        GroupID:s.GroupID
+      }
+    })
+    await CustomGroup.destroy({
+      where:{
+        GroupID:s.GroupID
+      }
+    })
+    await RefereceGroup.destroy({
+      where:{
+        GroupID:s.GroupID
+      }
+    })
+    return true
+  }
+  static async DeleteUserbyUID(s)
+  {
+     await GroupsUsers.destroy({
+       where:{
+        GroupID:s.GroupID,
+        UserPhoneID:s.UserPhoneID
+       }
+     })
+     return true
+  }
   static async GetUserByGroupID(s)
   {
    const Users=await GroupsUsers.findAll({
@@ -220,9 +261,10 @@ static async GetAllAeraDepUserbyAdminID(s)
         include:[{
           model:UserPhone,
           as:'Users',
-          where:{
-            status:9
-          },        
+          through: {
+            
+            where: {status:-1}
+          }      
           // 'order': "OrderID DESC"          
         }]
       

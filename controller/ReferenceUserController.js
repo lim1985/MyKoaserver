@@ -2,6 +2,18 @@ const ReferenceUserPhoneModel = require('../models/L_ReferenceUserModel')
 // const DepModel = require('../models/L_DepModels')
 //
 class ReferenceUserController {
+    static async Delete(ctx)
+    {
+        const data=ctx.request.query;
+        const res=await ReferenceUserPhoneModel.Delete(data)
+        if(res)
+        {
+            ctx.body={
+                code:1,
+                msg:'删除成功'
+            }            
+        }
+    }
     static async Add(ctx)
     {
         const res=ctx.request.query;

@@ -24,6 +24,31 @@ class ReferenceUserModel {
     })
     return ReferenceInfo
   }
+
+  /**
+   * 
+   * @param {DepID,UserPhoneID} s 
+  */
+  static async Delete(s)
+  {
+    const res = await ReferenceDEPUserPhones.destroy({
+      where :{
+        DepID:s.Department_ID,
+        UserPhoneID:s.ID,
+        status:6
+      }
+    }).then(r=>{
+      console.log(r)
+      return r
+     
+    }).catch(err=>{
+
+      console.log(err)
+      return err
+    })
+   return res
+  }
+
 /**
  * 查询部门用户按部门查找
  * @param {depid} s 

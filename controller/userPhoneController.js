@@ -1,8 +1,28 @@
 const userPhoneModel = require('../models/L_UsersPhone')
 const DepModel = require('../models/L_DepModels')
+const referenceUserModel = require('../models/L_ReferenceUserModel')
 //
 class UserPhoneController {
-
+    static async DeleteUsers(ctx)
+    {
+        const data=ctx.request.query
+        const res=await userPhoneModel.DeleteUserPhoneByID(data)
+        if(res)
+        {
+            ctx.body={
+                code:1,
+                msg:'删除联系人成功'
+            }
+        }
+        else
+        {
+            ctx.body={
+                code:-1,
+                msg:'删除失败，请联系管理员'
+            }
+        }
+        console.log(res)
+    }
 
     static async GetAllByDepID(ctx)
     {
@@ -264,6 +284,17 @@ class UserPhoneController {
                 Py_Index:data.Py_Index
               
         }
+        // s.DepID,
+        // s.UserPhoneID
+        let params={
+            DepID:_data.Department_ID,
+            UserPhoneID:_data.ID
+        }
+        const isExist= await referenceUserModel.FindReferencesUserByDepIDUserPhoneID(params)//该单位关联表里是否存在该人员信息  
+        const isNowDep=await userPhoneModel.findUserInformationByID({ID:_data.ID})
+        console.log(isNowDep)
+     if(!isExist || _data.Department_ID==isNowDep.dataValues.Department_ID)
+     {
         const result=await userPhoneModel.UpdateUserPhonebyID(_data)
         if(result)
         {
@@ -281,6 +312,15 @@ class UserPhoneController {
                 res:result
             }
         }
+     }
+     else
+     {
+         ctx.body={
+             code:-4,
+             msg:'该单位已经存在联系人,操作失败'
+         }
+     }
+        
     }
 /**
  * 新建用户通讯录方法

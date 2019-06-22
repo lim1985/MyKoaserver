@@ -1,7 +1,32 @@
 const CustomGroupModel = require('../models/L_ReferenceGroupModel')
 
 class CustomGroupModelController {
-    
+    static async DeleteGroupByGroupID(ctx)
+    {
+        const data=ctx.request.query;
+        console.log(data)
+        const res=await CustomGroupModel.DeleteGroupByGroupID(data)
+        if(res)
+        {
+            ctx.body={
+                code:1,
+                msg:'操作成功'
+            }
+        }
+        console.log(res);
+    }
+    static async DeleteUserByUID(ctx)
+    {
+        const data=ctx.request.query
+        const res=await CustomGroupModel.DeleteUserbyUID(data)
+        if(res)
+        {
+            ctx.body={
+                code:1,
+                msg:'删除成功'                
+            }
+        }
+    }
     static async FindAllUsersByGroupID(ctx)// 根据组ID 找到该组里面所有的联系人
     {
         const res=ctx.request.query;

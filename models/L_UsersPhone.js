@@ -4,6 +4,14 @@ const UsersPhone = gov.import('../schema/LIM_UsersPhone.js')
 const ResferenceUserPhoneAndDEP = gov.import('../schema/LIM_ResferenceAndDep.js')
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op
+const Deps = gov.import('../schema/LIM_Department')
+const ReferenceDEPUserPhones = gov.import('../schema/LIM_ResferenceAndDep.js')
+Deps.belongsToMany(UsersPhone, {through: ResferenceUserPhoneAndDEP,sourceKey:'DepartmentId', foreignKey: 'DepID' })
+UsersPhone.belongsToMany(Deps, {through: ResferenceUserPhoneAndDEP ,sourceKey:'ID', foreignKey: 'UserPhoneID'})
+gov.sync().then(function(result){
+  console.log('同步完成')
+  //   // 同步了'Role'、'UserRole'、'UserRole'三个模型
+  })
 
 class UsersPhoneModel {
 
@@ -128,19 +136,39 @@ static async GetPhoneUserByDepID(s)
  */
  static async GetPhoneUserByDepIDAndPermissionKey(s)
  { 
-  //  key: 'QXZ_XT', DepID: 74, status: 9 },
-        const PhoneUserList=await UsersPhone.findAndCountAll(
-          {
-            where:{
-              Permission_Key:s.key,
-              Department_ID:s.DepID,
-              status:s.status
-            },
-            order:[
-              ['OrderID', 'DESC'],],
+  
+        const PhoneUserList=await Deps.findAndCountAll({
+          attributes:['Abbreviation',
+                      'DepartmentId',
+                      'Permission_Key',
+                      'Priority',
+                      'UploadDir',
+                      Sequelize.col('Users.Email'),//内容
+                      Sequelize.col('Users.QQ'),//内容
+                      Sequelize.col('Users.status'),//内容
+                      Sequelize.col('Users.UserName'),//内容
+                      Sequelize.col('Users.UJOB'),//内容
+                      Sequelize.col('Users.Tel'),//内容
+                      Sequelize.col('Users.OrderID'),//内容
+                      Sequelize.col('Users.ID'),//内容
+                      Sequelize.col('Users.cellphone'),//内容
+                    ],
+          where:{
+            DepartmentId:s.DepID
+          },
+          include:[{
+            model:UsersPhone,  
+            as:'Users',
+            attributes:[], 
+            through: {
+            
+              where: {status:-1}
+            }
           }
-        )
-        return PhoneUserList
+         ], 
+           raw:true  
+        })
+        return PhoneUserList       
  }
   /**
    * 查询用户信息
@@ -236,12 +264,10 @@ static async GetPhoneUserByDepID(s)
       'status': 9,
       'Email':'',
       'Py_Index':s.Py_Index      
-    }).then(res=>{
-    
+    }).then(res=>{    
         let s={
           ID:res.ID,
-          DepID:res.Department_ID
-         
+          DepID:res.Department_ID         
         }
       return s    
     }).then(res=>{
@@ -251,16 +277,39 @@ static async GetPhoneUserByDepID(s)
        'status':-1
       })      
     })
-     
-      
-    // await ResferenceUserPhoneAndDEP.create({
-    //   DepID
-    //   UserPhoneID
-    //   status
-    // })
     return true
   }
-
+  /**
+   * 根据用户ID 删除主表用户，并且删除关联表里的数据
+   * @params data
+   * @return {Promise.<boolean>}   
+   */
+  static async DeleteUserPhoneByID(data)
+  {
+    return new Promise((resolve,reject)=>{
+      try {
+         UsersPhone.destroy({
+          where:{
+            ID:data.ID,
+            Department_ID:data.Department_ID
+          }
+        }).then(()=>{
+         ResferenceUserPhoneAndDEP.destroy({
+            where:{
+              UserPhoneID:data.ID,
+              DepID:data.Department_ID
+            }
+          })
+        }).then(()=>{
+          resolve(true)
+        })
+      } catch (error) {
+          reject(error)
+      }
+    })
+  }
+  
+   
    /**
    * 修改用户信息
    * @param data
@@ -268,10 +317,22 @@ static async GetPhoneUserByDepID(s)
    */
   static async UpdateUserPhonebyID (data) {
       return new Promise((resolve,reject)=>{
-        try{
-          UsersPhone.update(data,{where:{ID:data.ID}}).then(res=>{
-            resolve(res)
+        try{      
+          UsersPhone.update(data,{where:{ID:data.ID}}).then(res=>{//先修改主表
+            console.log(res);
+            return res
+          }).then(res=>{
+            if(res)
+            {
+              console.log(data)
+              ResferenceUserPhoneAndDEP.update({DepID:data.Department_ID},{//再修改关联表
+                where:{
+                  UserPhoneID:data.ID
+                }
+              })
+            }
           })
+          resolve()
         }catch(error)
         {
           reject(error)

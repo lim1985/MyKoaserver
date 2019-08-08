@@ -36,6 +36,14 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.STRING,
         allowNull: true
       },   
+      PID: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+      },
+      status: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+      },
     }, {
     timestamps: false,
     tableName: 'LIM_Department'

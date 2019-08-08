@@ -35,7 +35,7 @@ class RolesController {
  * @param {adminID} ctx 
  * return {Promise}
  */
-static async GetAdminRolesPermissionDepID(ctx)
+static async GetAdminRolesPermissionDepID(ctx)//根据AdminID 获取权限的API
 {
     const iid=ctx.request.query.AdminID
     const permissions=[]
@@ -47,7 +47,8 @@ static async GetAdminRolesPermissionDepID(ctx)
     for (let i in roles)
     {   
         let _PermissionsArr=await PermissionModel.SelectByRoleID(roles[i]) 
-              
+                    console.log(`000---000---000`)
+                    console.log(_PermissionsArr)
                     for(let x in _PermissionsArr)
                     {
                          let obj=new Object();
@@ -65,7 +66,7 @@ static async GetAdminRolesPermissionDepID(ctx)
                         }                    
                             let _permissArr=await  PermissionModel.findIDByPermissionName(_PermissionsArr[x].PermissionKey)
                             let _DepList= await DepModel.select_DepartmentByUploadDir(_PermissionsArr[x].PermissionKey)
-                            obj.label=_permissArr.Permission_name
+                            // obj.label=_permissArr.Permission_name
                             if(_permissArr)
                             {
                                 obj.label=_permissArr.Permission_name
@@ -193,7 +194,7 @@ static async GetAdminRolesPermissionDepID(ctx)
         //console.log(iid)
         const userinfo=await userModel.findUserByAminID(iid)
         const roles= userinfo.dataValues.RolesID.split('|')
-        console.log(roles)
+        // console.log(roles)
         let roleID=''
            // console.log(roles)
         // const result= await PermissionModel.findIDByPermissionName('QW')

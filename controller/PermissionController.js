@@ -1,6 +1,6 @@
 const PermissionModel = require('../models/L_PermissionModels')
 const DepModel = require('../models/L_DepModels')
-
+const rolesModel = require('../models/L_RolesModels')
 // const Perinformation = gov.import('../schema/LIM_PermissionInformation.js')
 
 // const jwt = require('jsonwebtoken')
@@ -8,14 +8,38 @@ const DepModel = require('../models/L_DepModels')
 // const bcrypt = require('bcryptjs')
 
 class PermissionController {
+static async GetAreaAllPermissbyAdminID(ctx)
+{
+    const data=ctx.request.query;
 
+    const result=await PermissionModel.GetAreaPermissionAllbyAdminID(data)
+    
+     ctx.body={
+         result
+     }
+}
+
+// 测试api开始
+            static async newPermissionInformationbyRoleID(ctx)
+            {
+                let data=ctx.request.query
+                console.log(data)
+                let ID=data.ID    
+                let res=await PermissionModel.newselectPermissionByroleid(ID);
+                ctx.body={
+                    res
+                   
+                }
+            }
+//测试api结束
 static async SelectPermissionInformationByRoleID(ctx)
 {
     let data=ctx.request.query
+    console.log(data)
     let ID=data.ID        
     let arr=[]   
     let _PermissionsArr=await PermissionModel.SelectByRoleID(ID) 
-            console.log(_PermissionsArr)
+            // console.log(_PermissionsArr)
                 for(let x in _PermissionsArr)
                 {
                      let obj=new Object();
@@ -25,17 +49,13 @@ static async SelectPermissionInformationByRoleID(ctx)
                      obj.IsView=_PermissionsArr[x].IsView,
                      obj.RoleID=_PermissionsArr[x].RoleID,
                      obj.value=_PermissionsArr[x].PermissionKey
-                     obj.label=_PermissionsArr[x].Permission_name
-                   
-
-                   
+                     obj.label=_PermissionsArr[x].Permission_name                   
                     if(_PermissionsArr[x].IsParent)
                     {
                         let _depArr=await DepModel.selectAll_DepartmentByPermission_Key(_PermissionsArr[x].PermissionKey,_PermissionsArr[x].RoleID)    
                         console.log(_depArr.rows)
                         obj.actionOptions=_depArr.rows
-                    }
-                   
+                    }                   
                         let _permissArr=await  PermissionModel.findIDByPermissionName(_PermissionsArr[x].PermissionKey)
                         if(_permissArr)
                         {
@@ -62,7 +82,8 @@ static async UpdataPermissionInformation(ctx)
     // }
   
     let data=ctx.request.body
-    console.log(data)
+    // console.log('服务器收到的')
+    // console.log(data)
     let res=await  PermissionModel.UpdataPermissionInFormationByRoleID(data)  
    
   ctx.body={
@@ -79,14 +100,34 @@ static async DeletePermissionByID(ctx){
     // const data=ctx.request.query
     console.log(ctx.request.query)
     const data =ctx.request.query
-    const flag=await PermissionModel.delPermission(data.ID)    
+    const flag=await PermissionModel.delPermission(data)  
+    let rolelist=await rolesModel.findRoles();  
+    
+    // const                    PermissionModel.DelPerinformation()
+    
     console.log('控制器：')
     console.log(flag)    
     if(flag==1)
-    {
+    { 
+        //             where:{
+        //               IsParent:1,
+        //               RoleID:data[x].roleid,
+        //               PermissionKey:data[x].key
+        //                  }
+        let _arr=[]
+        for(let x in rolelist.rows)
+        {
+             let _obj=new Object();
+                 _obj.roleid=rolelist.rows[x].roleid;
+                 _obj.key=data.key;
+                 _obj.IsParent=1;
+                 _arr.push(_obj)
+        }
+        const result=await PermissionModel.DelPerinformation(_arr)
         ctx.body={
             code:1,
-            message:'删除权限成功'
+            message:'删除权限成功',
+            result
         }
     }
     else
@@ -212,33 +253,47 @@ static async findAllPermission(ctx)
      static async UpdatePermission(ctx)
      {
       //console.log(ctx.request.query)
-      const data=ctx.request.query
-    //   const Permissioninfo=await PermissionModel.findIDByPermissionName(data.Permission_key)
+       const data=ctx.request.query
+   
+       const Isexits=await PermissionModel.findIDByPermissionName(data.Permissionskey)
      
-    //   if(Permissioninfo)
-    //   {
-    //       ctx.body={
-    //           code:-1,
-    //           message:'该权限标识已存在，请不要重复添加'
-    //       }
-    //   }else
-    //   {
-        const result= await PermissionModel.updatePermission(data)
+      
+        if(!Isexits || Isexits.status!=data.status)
+        {       
+            console.log(Isexits)
+            console.log(Isexits.status)
+            let _data={
+                ID:data.ID,
+                Permission_key:data.Permissionskey,
+                Permission_name:data.PermissionName,
+                description:data.description,
+                OrderID:data.OrderID,
+                areakey:data.Areakey,
+                status:data.status
+            }
+            const result= await PermissionModel.updatePermission(_data)
             if(result)
             {
                 ctx.body={
                     code:1,
                     message:'修改成功！'
-                }
+                    }
             }
             else
             {
                 ctx.body={
                     code:-1,
                     message:'修改失败！'
-                }
+                    }
+            }         
+        }
+        else
+        {
+            ctx.body={
+                code:-1,
+                msg:'类别标识重复，写入失败'
             }
-    //   }
+        }    
      }
     /**
      * 新增权限
@@ -264,13 +319,39 @@ static async findAllPermission(ctx)
                   }
                 }
                 else
-                {
+                {                                  
                     const addPermissionstatus=await PermissionModel.createPermission(data)
+        // ID:57
+        // OrderID:"10"
+        // Permission_key:"SDSD"
+        // Permission_name:"受到收到"
+        // areakey:"sysdxqrmzf"
+        // console.log(addPermissionstatus)
                             if(addPermissionstatus)
                             {
+                                let rolelist=await rolesModel.findRoles();
+                                let _arr=[];
+                               
+                                for(let x in rolelist.rows)
+                                {
+                                    let _obj=new Object();
+                                    _obj.RoleID=rolelist.rows[x].roleid;
+                                    _obj.PermissionKey=addPermissionstatus.Permission_key;
+                                    _obj.IsParent=1;
+                                    _obj.IsView=0;
+                                    _obj.IsEdit=0;
+                                    _obj.DepID=null;  
+                                    _arr.push(_obj); 
+                                                                   
+                                }
+                                let addres=await PermissionModel.AddPermissionInformationByRoleids(_arr);
                                 ctx.body={
                                     code:1,
-                                    message:'权限添加成功！'
+                                    message:'权限添加成功！',
+                                    rolelist,
+                                    addPermissionstatus,
+                                    _arr,
+                                    addres
                                 }
                             }
                             else

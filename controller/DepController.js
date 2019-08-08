@@ -124,15 +124,15 @@ static async QueryFindCountAllDEP(ctx)
 
         let obj=new Object();
         const a=ctx.request.body
-        obj.DepartmentName=a.DEPName
-        obj.Permission_Key=a.depKey
+        obj.DepartmentName=a.DepFullName
+        obj.Permission_Key=a.Permissionkey
         obj.UploadDir=a.UploadDir
         obj.Abbreviation=a.Abbreviation
         obj.Priority=a.Priority
         obj.ParentDepartmentId=1
         obj.Number='NULL'
 
-        const depflag=await DepModel.select_DepartmentByDEPName(a.DEPName)
+        const depflag=await DepModel.select_DepartmentByDEPName(a.DepFullName)
        if(!depflag)
        {
         const result=await DepModel.Add_Department(obj)

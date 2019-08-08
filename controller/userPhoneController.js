@@ -3,6 +3,10 @@ const DepModel = require('../models/L_DepModels')
 const referenceUserModel = require('../models/L_ReferenceUserModel')
 //
 class UserPhoneController {
+
+
+
+
     static async DeleteUsers(ctx)
     {
         const data=ctx.request.query
@@ -71,7 +75,7 @@ class UserPhoneController {
     // GetPhoneUserByDepIDAndPermissionKey
    static async GetByDepIDAndPermissionKey(ctx)
    {
-     const res=ctx.request.query
+    const res=ctx.request.query
     // const data =ctx.request.body
     // console.log(data)
     const _depid=res.DepID
@@ -359,16 +363,50 @@ static async AdduserPhones(ctx)
         result:result
     }
    }
-    // console.log(result)
-    // ctx.body={
-    //     res:result
-    // }
-    // const res=await userPhoneModel.InertUserPhones(data)
-    // console.log(res)
-  
-
 }
+ static async GetuserInformationbyTelNum(ctx)
+ {
+     const data=ctx.request.query
+     let obj=new Object();
+     obj.tel=data.data;
+     const result=await userPhoneModel.findUserByPhoneNum(obj)  
+     if(!result)
+     {
+         ctx.body={
+             code:-1
+         }         
+     }  
+     else
+     {
+        ctx.body={
+            code:1,
+            res:result
+          }
+     }
+        
+ }
+ static async GetuserInformationbyUsername(ctx)
+ {
+     const data=ctx.request.query
+     let obj=new Object();
+     obj.username=data.data;
+     const result=await userPhoneModel.findUserByusername(obj)  
+     if(!result)
+     {
+         ctx.body={
+             code:-1
+         }         
+     }  
+     else
+     {
+        ctx.body={
+            code:1,
+            res:result
+          }
+     }    
+ }
 
+ 
 }
 
 module.exports = UserPhoneController

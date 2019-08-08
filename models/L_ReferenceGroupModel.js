@@ -193,8 +193,7 @@ resolve(res)
         //   }
         //  }
        })
-      })  
-      
+      })        
     }
   static async addUsersToGroup(datalist)
   {
@@ -213,8 +212,48 @@ resolve(res)
       {
         reject(error)
       }
-    })
-    
+    })    
+  }  
+  static async addUserToGroup(s)
+  {
+  
+    return new Promise((resolve,reject)=>{
+     
+    try{
+      GroupsUsers.findOne({
+        where:{
+          GroupID:s.GroupID,
+          UserPhoneID:s.UID
+        }
+      }).then(res=>{
+          console.log(res)
+          if(!res)
+          {
+            GroupsUsers.create({   
+              'GroupID': s.GroupID,
+              'UserPhoneID':s.UID,
+              where:{
+                GroupID:s.GroupID
+              }
+          }).then(res =>{
+            console.log(res)
+            resolve(res);          
+          })
+          }
+          else
+          {
+
+            resolve({
+              code:-1              
+            })
+          }
+      })
+       
+      }catch(error)
+      {
+        reject(error)
+      }
+    })    
   }
 
   static async GetCustomGroupByDepID(s)
@@ -261,8 +300,10 @@ static async GetAllAeraDepUserbyAdminID(s)
         include:[{
           model:UserPhone,
           as:'Users',
-          through: {
-            
+          where:{
+            status:9
+          },
+          through: {            
             where: {status:-1}
           }      
           // 'order': "OrderID DESC"          

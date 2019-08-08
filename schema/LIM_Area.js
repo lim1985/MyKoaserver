@@ -4,9 +4,10 @@ module.exports = function(sequelize, DataTypes) {
 
     return sequelize.define('LIM_Area', {
       ID:{
-          type:DataTypes.INTEGER,
-            allowNull:false,
-            primaryKey: true
+        type:DataTypes.INTEGER,
+        allowNull:false,
+        primaryKey: true,
+        autoIncrement: true
          },
       areaname:{
         type: DataTypes.STRING,
@@ -17,13 +18,18 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: false
       },
       areakey: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false
       },
       AdminID:{
         type: DataTypes.INTEGER,
         allowNull: false
-      }
+      },
+      RoleID:{
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },    
+      
     }, {
     timestamps: false,
     tableName: 'LIM_Area'

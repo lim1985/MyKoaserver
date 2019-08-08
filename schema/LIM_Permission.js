@@ -32,6 +32,18 @@ module.exports = function(sequelize, DataTypes) {
           OrderID:{
             type:DataTypes.INTEGER,
             allowNull:true,  
+          },
+          areakey:{
+            type:DataTypes.STRING,
+            allowNull:true,  
+          },
+          AreaID:{
+            type:DataTypes.INTEGER,
+            allowNull:true,  
+          },
+          status:{
+            type:DataTypes.INTEGER,
+            allowNull:true,  
           }
 
     }, {

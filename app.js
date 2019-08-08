@@ -7,11 +7,14 @@ const bodyparser=require('koa-bodyparser')
 const koajwt = require('koa-jwt')
 const secret = require('./config/secret.json')
 const err = require('./middlreware/error')
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
+
 // const logger = require('koa-logger')
 
 // app.use(err())                                    //  /api/login 参考的配置
 app.use(cors())
-// app.use(koajwt({secret: secret.sign}).unless({path: [/^\/api\/login/, /^\/api\/createUser/]}))//正常可用的配置
+//app.use(koajwt({secret: secret.sign}).unless({path: [/^\/api\/login/, /^\/api\/createUser/]}))//正常可用的配置
 //错误的例子 app.use(jwt({secret: secret.sign}).unless({path: [/^http\:\/\/127\.0\.0\.1\:3001\/api\/login/, /^\/api\/createUser/]}))
 // app.use(function(ctx, next){
 //   return next().catch((err) => {

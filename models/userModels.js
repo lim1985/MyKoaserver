@@ -1,6 +1,19 @@
 const db = require('../config/db')
 const gov = db.gov
 const Admin = gov.import('../schema/PE_Admin.js')
+// const LIM_Roles = gov.import('../schema/LIM_Roles.js')
+// const LIM_Reference_AdminRoles = gov.import('../schema/LIM_Reference_AdminRoles.js')
+// const Area = gov.import('../schema/LIM_Area')
+// const Permission = gov.import('../schema/LIM_Permission')
+// Admin.belongsToMany(LIM_Roles, {  as: 'Roles', through: LIM_Reference_AdminRoles,sourceKey:'AdminID', foreignKey: 'UUID' })
+// LIM_Roles.belongsToMany(Admin, {  as: 'Admin',through: LIM_Reference_AdminRoles ,sourceKey:'ID', foreignKey: 'roleid'})
+// LIM_Roles.hasMany(Area,{sourceKey:'roleid',foreignKey:'RoleID'})
+
+// Deps.belongsToMany(UsersPhone, {through: ResferenceUserPhoneAndDEP,sourceKey:'DepartmentId', foreignKey: 'DepID' })
+// UsersPhone.belongsToMany(Deps, {through: ResferenceUserPhoneAndDEP ,sourceKey:'ID', foreignKey: 'UserPhoneID'})
+
+// Deps.belongsToMany(UserPhone, {  as: 'Users', through: DEPUsers,sourceKey:'DepartmentId', foreignKey: 'DepID' })
+// UserPhone.belongsToMany(Deps, {  as: 'Deps',through: DEPUsers ,sourceKey:'ID', foreignKey: 'UserPhoneID'})
 
 
 class AdminModel {

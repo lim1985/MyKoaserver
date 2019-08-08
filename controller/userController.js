@@ -38,9 +38,6 @@ class UserController {
                     userinfo:user.dataValues
                    
                 }
-                //   console.log(userToken)
-                //  console.log(user.dataValues)
-               
              }
              else
              {
@@ -204,15 +201,19 @@ class UserController {
            const pageSize=res.pageSize
            const offset=(pageNo-1) * pageSize   
            const limit=pageSize * 1
-           const Permissionlist=await PermissionModel.findPermiss({ offset:offset,limit: limit })        
+           const infor=[];
+           const deps=[];
+           const Permissionlist=await PermissionModel.findPermiss({status:1, offset:offset,limit: limit })        
            for(let x in Permissionlist.rows)
            {
             // console.log(Permissionlist.rows[x].Permission_key)    
             const obj=new Object();               
             const _DepArr=[]  
             // console.log(r[i])
-             const Permissioninfo=await PermissionModel.findIDByPermissionName(Permissionlist.rows[x].Permission_key)    
+             const Permissioninfo=await PermissionModel.findIDByPermissionName(Permissionlist.rows[x].Permission_key)  
+           infor.push(Permissioninfo);
              const DEPlist=await DepModel.selectAll_DepartmentByPermission_Key(Permissioninfo.dataValues.Permission_key,Permissioninfo.dataValues.OrderID)
+            deps.push(DEPlist);
              DEPlist.rows.forEach(v => {
                console.log(v)
                 const objDep=new Object() 
@@ -231,21 +232,21 @@ class UserController {
           
               obj.key=Permissioninfo.dataValues.Permission_key
               obj.icon=""
+              obj.ddd="1111"
               obj.description=Permissioninfo.dataValues.description
               obj.title=Permissioninfo.dataValues.Permission_name
               obj.OrderID=Permissioninfo.dataValues.OrderID
               obj.children=_DepArr
-              Permissionarr.push(obj)
-            
-         
+              Permissionarr.push(obj)  
            }         
            ctx.body={
              result:Permissionarr,
-            
-
+             infor,
+             deps,
+             Permissionlist
            }
       }
-
+    
       
       static async GetPermissionAndDeplist(ctx)
       {
@@ -256,17 +257,22 @@ class UserController {
            const pageSize=res.pageSize
            const offset=(pageNo-1) * pageSize   
            const limit=pageSize * 1
-           const Permissionlist=await PermissionModel.findPermiss({ offset:offset,limit: limit })        
+           const Permissionlist=await PermissionModel.findPermiss({ offset:offset,limit: limit }) 
+        
+          //  console.log(Pesrmissionlist.rows);       
            for(let x in Permissionlist.rows)
            {
             // console.log(Permissionlist.rows[x].Permission_key)    
             const obj=new Object();               
             const _DepArr=[]  
             // console.log(r[i])
-             const Permissioninfo=await PermissionModel.findIDByPermissionName(Permissionlist.rows[x].Permission_key)    
+             const Permissioninfo=await PermissionModel.findIDByPermissionName(Permissionlist.rows[x].Permission_key)  
+             console.log(Permissioninfo)  
+           
              const DEPlist=await DepModel.selectAll_DepartmentByPermission_Key(Permissioninfo.dataValues.Permission_key,Permissioninfo.dataValues.OrderID)
+         
              DEPlist.rows.forEach(v => {
-               console.log(v)
+              //  console.log(v)
                 const objDep=new Object() 
                 objDep.DepartmentName=v.DepartmentName
                 objDep.DepartmentId=v.DepartmentId
@@ -287,9 +293,8 @@ class UserController {
             Permissionarr.push(obj)
            }         
            ctx.body={
-             result:Permissionarr,
-            
-
+             result:Permissionarr
+        
            }
       }
 

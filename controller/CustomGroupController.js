@@ -76,26 +76,43 @@ class CustomGroupModelController {
        
         // const data=ctx.request.query
          console.log(data)
-         const isinited=await CustomGroupModel.InitGroup(data)
-         console.log(isinited);
-         if(isinited)
-         {     
+         if(data.UIDS.lenght>1)
+         {
+            const isinited=await CustomGroupModel.InitGroup(data);
+            if(isinited)
+            {     
+   
+               console.log(data);
+            let _arr= data.UIDS.map(item=>{
+                   return {GroupID:data.GroupID,UserPhoneID:item}
+               })
+               const res=await CustomGroupModel.addUsersToGroup(_arr)
+               console.log(res)
+               if(res)
+               {   
+                   ctx.body={
+                       code:1,
+                       data:res
+                   }   
+               }
+                   
+            } 
+         }
+         else
+         { 
 
-            console.log(data);
-         let _arr= data.UIDS.map(item=>{
-                return {GroupID:data.GroupID,UserPhoneID:item}
-            })
-            const res=await CustomGroupModel.addUsersToGroup(_arr)
-            console.log(res)
-            if(res)
-            {   
-                ctx.body={
-                    code:1,
-                    data:res
-                }   
-            }
-                
-         }       
+            //   let _arr= data.UIDS.map(item=>{
+            // return {GroupID:data.GroupID,UID:item.UID}})
+             let res= await CustomGroupModel.addUserToGroup(data);
+             if(res)
+             {   
+                 ctx.body={
+                     code:1,
+                     data:res
+                 }   
+             }
+         }
+             
     }
    static async GetAllAreaDepUserbyAdminID(ctx)//根据AdminID里的areakey 获取所有的部门和部门下所有的通讯录人员
    {

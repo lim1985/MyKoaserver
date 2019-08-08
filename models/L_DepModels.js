@@ -5,9 +5,6 @@ const Perinformation = gov.import('../schema/LIM_PermissionInformation.js')
 const Sequelize = require('sequelize');
 DEP.belongsTo(Perinformation, { foreignKey: 'DepartmentId', targetKey: 'DepID', as: 'DepInformation' });
 class DepartmentModel {
-  
-
- 
    /**
    * 删除部门
    * @param role
@@ -79,22 +76,20 @@ class DepartmentModel {
     resolve(res)
   })
 }
-  /**
- * 
- * @param {ctx} s 
- * @return Dep
- */
-static async select_DepartmentByUploadDir(s)
-{    
-
-      const DepartmentInfo = await DEP.findOne({
-        where: {
-          UploadDir:s
-        }
-      })
-      return DepartmentInfo
-   
-}
+        /**
+       * 
+       * @param {ctx} s 
+       * @return Dep
+       */
+      static async select_DepartmentByUploadDir(s)
+      {    
+            const DepartmentInfo = await DEP.findOne({
+              where: {
+                UploadDir:s
+              }
+            })
+            return DepartmentInfo  
+      }
 /**
  * 
  * @param {ctx} s 

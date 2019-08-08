@@ -3,15 +3,18 @@ const gov = db.gov
 const UsersPhone = gov.import('../schema/LIM_UsersPhone.js')
 const ResferenceUserPhoneAndDEP = gov.import('../schema/LIM_ResferenceAndDep.js')
 const Sequelize = require('sequelize');
+// const Area = gov.import('../schema/LIM_Area')
 const Op = Sequelize.Op
 const Deps = gov.import('../schema/LIM_Department')
-const ReferenceDEPUserPhones = gov.import('../schema/LIM_ResferenceAndDep.js')
+// const ReferenceDEPUserPhones = gov.import('../schema/LIM_ResferenceAndDep.js')
 Deps.belongsToMany(UsersPhone, {through: ResferenceUserPhoneAndDEP,sourceKey:'DepartmentId', foreignKey: 'DepID' })
 UsersPhone.belongsToMany(Deps, {through: ResferenceUserPhoneAndDEP ,sourceKey:'ID', foreignKey: 'UserPhoneID'})
-gov.sync().then(function(result){
-  console.log('同步完成')
-  //   // 同步了'Role'、'UserRole'、'UserRole'三个模型
-  })
+// Area.hasMany(Permission,{foreignKey:'areakey',sourceKey:'areakey',as:'Permission'});//area和Permission 表 1对多
+
+// gov.sync().then(function(result){
+//   console.log('部门和列表成员同步完成')
+//   //   // 同步了'Role'、'UserRole'、'UserRole'三个模型
+//   })
 
 class UsersPhoneModel {
 
@@ -96,8 +99,6 @@ return new Promise(async(resolve)=>{
   //       console.log(res)
   //   resolve(res)
   // })
-
-
       //  const PhoneUserReferencUserList=await UsersPhone.findAndCountAll(
       //    {
       //      where:{          
@@ -109,6 +110,7 @@ return new Promise(async(resolve)=>{
       //  )
       //  return PhoneUserReferencUserList
 }
+
 /**
  * 查询部门用户按部门查找
  * @param {depid} s 
@@ -156,9 +158,13 @@ static async GetPhoneUserByDepID(s)
           where:{
             DepartmentId:s.DepID
           },
+          
           include:[{
             model:UsersPhone,  
             as:'Users',
+            where:{
+              status:9
+            },
             attributes:[], 
             through: {
             
@@ -183,6 +189,18 @@ static async GetPhoneUserByDepID(s)
            { H_cellphone: s.tel }
         ],
      },
+    })
+    return userInfo
+  }
+   /**
+   * 查询用户信息
+   * @param name  姓名
+   * @returns {Promise.<*>}
+   */
+  static async findUserByusername (s) {
+    const userInfo = await UsersPhone.findOne({
+      where:         
+           { UserName : s.username },
     })
     return userInfo
   }
@@ -231,9 +249,8 @@ static async GetPhoneUserByDepID(s)
         order:[
         ['ID', 'DESC'],],
        
-      }
-          //{ offset: 0, limit: 10 },
-     )
+      })
+          //{ offset: 0, limit: 10 },     
     return UsersPhonelist
   }
   /**

@@ -26,7 +26,8 @@ module.exports = function(sequelize, DataTypes) {
         DepID:{
           type: DataTypes.INTEGER,
           allowNull: false
-        }
+        },
+        
     }, {
     timestamps: false,
     tableName: 'LIM_PermissionInformation'

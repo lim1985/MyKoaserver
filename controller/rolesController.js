@@ -11,7 +11,16 @@ const DepModel = require('../models/L_DepModels')
 
 class RolesController {
   
+    static async newGetPermissionAndDepList(ctx)
+    {
+      const data=ctx.request.query
+          console.log(data)
+          const res=await RolesModel.newGetAllPermissionByRoleID(data)
+      ctx.body={
+        res
+      }
 
+    }
      /**
      * 查询某个角色的权限列表
      * @param {Roleid} ctx 角色ID

@@ -23,12 +23,16 @@ router
   .get('/login', UserController.myLogin) 
   .get('/userlist',UserController.GetallAdminlist)//获取所有用户
   .post('/ActionUpdataAdmin',UserController.UpdataAdminRolesByID)//修改用户权限
+
   //roles
   .get('/rolesAdd', RolesController.createRoles) 
   .get('/roleslist', RolesController.findAllroles) 
   .get('/rolesdel', RolesController.DeleterolesByID) 
   .post('/rolesAddPermission',RolesController.UpdataRolesPremissionbyID)
   .get('/getPermissionbyroleID',RolesController.GetPermissionbyRoleID) 
+  .get('/getAllPermissionbyRoleID',RolesController.newGetPermissionAndDepList) 
+
+  
   //adminroles
   .post('/adminroladd',AdminRolesController.addAdminRoles)
   .get('/admininfo',AdminRolesController.GetAdminRolesPermission)
@@ -41,7 +45,11 @@ router
   .get('/PermissionUpdata',PermissionController.UpdatePermission)
   .get('/PermissionDel',PermissionController.DeletePermissionByID)
   .get('/Permissionbykey',PermissionController.findPermissionBykey)
+  .get('/AreaPermissionbyAdminID',PermissionController.GetAreaAllPermissbyAdminID)
   .post('/UpdataPermissionInformation',PermissionController.UpdataPermissionInformation)
+  .get('/GetallPermission',PermissionController.newPermissionInformationbyRoleID)
+
+  
   //DepartmentController
   .get('/DepartmentGet',DepartmentController.GetDepartmentByKey)//搜索dep信息by Permission_Key
   .get('/DepartmentGetByID',DepartmentController.GetDepartmentByID)//搜索dep信息by Permission_Key
@@ -63,8 +71,10 @@ router
   .get('/GetAllPhoneuser',UserPhonelistController.GetAllPhoneuser)
   .get('/GetAllByDepID',UserPhonelistController.GetAllByDepID)
   .get('/DeleteUser',UserPhonelistController.DeleteUsers)
+  .get('/GetuserInformationbyTelNum',UserPhonelistController.GetuserInformationbyTelNum)
+  .get('/GetuserInformationbyname',UserPhonelistController.GetuserInformationbyUsername)
   
-  
+
   
 //获取路由表
   .get('/getRouteByAdmin',UserController.GetRouteByAdminID)
@@ -79,7 +89,7 @@ router
   .get('/GetGroup',CustomGroupController.GetcustomGroupByDepID)
   .get('/GetAllDepUser',CustomGroupController.GetAllAreaDepUserbyAdminID)
   .post('/adduserTogroup',CustomGroupController.AddUsersToGroup)
-  .get('/InGroupUsersID',CustomGroupController.GetUserByGroupID)
+  .get('/InGroupUsersID',CustomGroupController.GetUserByGroupID)//读取组里的用户
   .get('/FindAllUserByGroupID',CustomGroupController.FindAllUsersByGroupID)
   .get('/DeleteGroupUser',CustomGroupController.DeleteUserByUID)
   .get('/DeleteGroup',CustomGroupController.DeleteGroupByGroupID)

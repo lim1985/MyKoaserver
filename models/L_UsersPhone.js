@@ -278,9 +278,10 @@ static async GetPhoneUserByDepID(s)
       'Type': s.type,
       'OrderID': s.orderid,
       'Sex': s.Sex,
-      'status': 9,
+      'status': s.status,
       'Email':'',
-      'Py_Index':s.Py_Index      
+      'Py_Index':s.Py_Index,
+      'beizhu':s.beizhu   
     }).then(res=>{    
         let s={
           ID:res.ID,

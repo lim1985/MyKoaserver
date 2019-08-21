@@ -172,12 +172,12 @@ static async findAllPermission(ctx)
   //  console.log(ctx.request.query)
     const res=ctx.request.query
    //   console.log(res)
-      const pageNo=res.pageNo
+    const pageNo=res.pageNo
     //  console.log(pageNo)
-      const pageSize=res.pageSize
-       const offset=(pageNo-1) * pageSize
-     // console.log(typeof(offset))
-     const limit=pageSize * 1
+    const pageSize=res.pageSize
+    const offset=(pageNo-1) * pageSize
+    // console.log(typeof(offset))
+    const limit=pageSize * 1
      // console.log(typeof(limit))
   
  const Permissionlist=await PermissionModel.findPermiss({ offset:offset,limit: limit })   //{ offset: 0, limit: 10 }, 跳过10 条数据并获取其后的 10 条数据（实例）
@@ -189,7 +189,7 @@ static async findAllPermission(ctx)
         data:Permissionlist.rows,
         totalCount:Permissionlist.count,
         totalPage:parseInt(Permissionlist.count/pageSize)
-                    }
+        }
  
     ctx.body={
        result:result

@@ -83,6 +83,10 @@ module.exports = function(sequelize, DataTypes) {
       Py_Index:{
         type: DataTypes.STRING,
         allowNull: true
+      },
+      beizhu:{
+        type: DataTypes.STRING,
+        allowNull: true
       }
     }, {
     timestamps: false,

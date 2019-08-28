@@ -14,6 +14,25 @@ class ReferenceUserController {
             }            
         }
     }
+    static async IsReference(ctx)
+    {
+        const res=ctx.request.query;
+        const IsReference=await ReferenceUserPhoneModel.FindReferencesUserByDepIDUserPhoneID(res);
+        if(IsReference)
+        {
+            ctx.body={
+                code:-4,
+                msg:'该联系人已经引用过，请不要重复引用'
+            }
+        }
+        else
+        {
+            ctx.body={
+                code:1,
+                msg:'可以引用'
+            }
+        }
+    }
     static async Add(ctx)
     {
         const res=ctx.request.query;

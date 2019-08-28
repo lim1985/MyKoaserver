@@ -340,7 +340,7 @@ static async AdduserPhones(ctx)
     const result=await userPhoneModel.findUserByPhoneNum(data)     
      if(!result)
      {
-        const add=await userPhoneModel.InertUserPhones(data)
+      const add=await userPhoneModel.InertUserPhones(data)
       if(!add)
     {
         ctx.body={
@@ -404,6 +404,25 @@ static async AdduserPhones(ctx)
             res:result
           }
      }    
+ }
+ static async GetUserByNameAndDepID(ctx)
+ {
+    const data=ctx.request.body    
+    const res=await userPhoneModel.findUsersByPhoneAndDepID(data)
+    
+     ctx.body={
+         res
+     }
+    // const res=await userPhoneModel.importUsersListfromExcle(data)  
+    //userPhoneModel.importUsersListfromExcle
+ }
+ static async importUsersListfromExcle(ctx)
+ {
+    const data=ctx.request.body    
+    let res = await userPhoneModel.importUsersListfromExcle(data)
+     ctx.body={
+         res
+     }
  }
 
  

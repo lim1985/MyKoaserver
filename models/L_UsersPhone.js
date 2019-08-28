@@ -217,6 +217,77 @@ static async GetPhoneUserByDepID(s)
     })
     return userInfo
   }
+  /**
+   * 查询用户信息
+   * @param DepID  部门ID
+   * @returns {Promise.<*>}
+   */
+  static async findUsersByPhoneAndDepID (s) {
+      let resCount=s.length;
+      let _Err=[] 
+  
+      return new Promise((resolve)=>{
+          s.forEach(async v=>{
+            UsersPhone.findOne({
+                      where:{
+                        Department_ID:v.Department_ID,
+                        cellphone:v.cellphone
+                      }
+            }).then(res=>{ 
+                  _Err.push(res)
+                  resCount--  
+                  if(resCount==0)
+                    {
+                     resolve(_Err);
+                    }                                          
+              })
+          })
+      })
+   
+    //  return new Promise((resolve)=>{
+    //     s.forEach(async v => {          
+    //      const userlist= await UsersPhone.findOne({
+    //         where:{
+    //           Department_ID:v.Department_ID,
+    //           cellphone:v.cellphone
+    //         }
+    //       })
+    //       resolve(userlist);
+    //     });
+       
+    //  })
+     
+    // const userInfo = await UsersPhone.findOne({
+    //   where: {
+    //     Department_ID:s.Department_ID
+    //  },
+    // })
+    // return userInfo
+  }
+   /**
+   * 查询用户信息
+   * @param cellphone  联系人电话号码
+   * @returns {Promise.<*>}
+   */
+  static async findUserInformationBycellphone (s) {
+    return new Promise((resolve)=>{
+      s.forEach(async v => {          
+       const userlist= await UsersPhone.findOne({
+          where:{
+            cellphone:v.cellphone
+          }
+        })
+        resolve(userlist);
+      });
+     
+   })
+    // const userInfo = await UsersPhone.findOne({
+    //   where: {
+    //     cellphone:s.cellphone
+    //  },
+    // })
+    // return userInfo
+  }
  /**
    * 获得所有用户列表
    * @param name  姓名
@@ -326,7 +397,86 @@ static async GetPhoneUserByDepID(s)
       }
     })
   }
+  static async import_InertUserPhones(data){
+    var timestamp = Math.round(new Date().getTime()/1000).toString();
+    // {UserPhoneID:_this.ReferenceUserId,DepID:_this.mdl[1]}
+     let IsRefere=data.RefereStatus
+     if(IsRefere==-1)
+     {
+      await UsersPhone.create({
+        'UserName': data.UserName,
+        'Department_ID': data.Department_ID,
+        'Permission_Key':data.Permission_Key,
+        'UJOB': data.UJOB,    
+        'cellphone': data.cellphone,     
+        'inTime':timestamp,     
+        'Sex': data.Sex,
+        'status': data.status,     
+        'Py_Index':data.Py_Index,       
+      }).then(res=>{    
+          let s={
+            ID:res.ID,
+            DepID:res.Department_ID              
+          }
+        return s    
+      }).then(res=>{
+        ResferenceUserPhoneAndDEP.create({
+         'UserPhoneID':res.ID,
+         'DepID':res.DepID,
+         'status':data.RefereStatus
+        })      
+      })
+     }
+     else
+     {
+      ResferenceUserPhoneAndDEP.create({
+        'UserPhoneID':data.ID,
+        'DepID': data.Department_ID,
+        'status':data.RefereStatus
+       }) 
+     }
+
+    
+    return true
+  }
+
+  /**
+   * 
+   * @param {data} data 
+   * 批量插入联系人
+   * 从excle表导入的数据
+   */
+  static async importUsersListfromExcle(data)  {       
   
+    return new Promise((resolve,reject)=>{
+          try {
+            let dataCount=data.length
+            let _arr=[]
+            data.forEach(v => {
+              UsersPhoneModel.import_InertUserPhones(v).then(res=>{
+                dataCount--
+                _arr.push(res)
+                if(dataCount==0)
+                {
+                  resolve(_arr);
+                }
+              })
+         });
+
+            // UsersPhone.bulkCreate(data).then(res=>{
+            //  return res   
+            // }).then(r=>{     
+            //   let res={
+            //     data,
+            //     r
+            //   }         
+            //   resolve(res);
+            // })                
+          } catch (error) {
+              reject(error);
+          }
+    })
+  }
    
    /**
    * 修改用户信息

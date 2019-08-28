@@ -65,6 +65,10 @@ router
   .post('/asyncValidateTel',UserPhonelistController.ValidateTel)
   .post('/UpdatePhoneUser',UserPhonelistController.UpdateUserPhoneinformation)
   .post('/AddPhoneUser',UserPhonelistController.AdduserPhones)
+  .post('/GetUserByNameAndDepID',UserPhonelistController.GetUserByNameAndDepID)
+  //批量导入通讯录用户
+  .post('/importUsersList',UserPhonelistController.importUsersListfromExcle)
+
   .get('/AllPhoneUserByPermissionkey',UserPhonelistController.GetAllUserPhoneListByPermissionKey)
   .get('/GetDepIDAndPermissionKey',UserPhonelistController.GetByDepIDAndPermissionKey)
   .post('/PostDepIDAndPermissionKey',UserPhonelistController.PostByDepIDAndPermissionKey)  
@@ -84,6 +88,7 @@ router
 //引用表
   .get('/ReferenceAdd',ReferenceUserController.Add)
   .get('/ReferenceDelete',ReferenceUserController.Delete)
+  .get('/IsReference',ReferenceUserController.IsReference)  
 //customgroup
   .get('/createGroup',CustomGroupController.CreateGroup)
   .get('/GetGroup',CustomGroupController.GetcustomGroupByDepID)

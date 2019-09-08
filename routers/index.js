@@ -59,8 +59,9 @@ router
   .post('/DeleteDEPartment',DepartmentController.PostDelDepByDEPID)
   .get('/DepartmentQueryALL',DepartmentController.QueryFindCountAllDEP)
   .get('/selectAlldepartmentBykey',DepartmentController.selectAll_DepartmentByPermission_Key)
+  .get('/SelectDepslistsbyLike',DepartmentController.SelectDepslistsbyLike)
   
-  
+ 
   //phoneUser通讯录接口
   .post('/asyncValidateTel',UserPhonelistController.ValidateTel)
   .post('/UpdatePhoneUser',UserPhonelistController.UpdateUserPhoneinformation)
@@ -77,7 +78,8 @@ router
   .get('/DeleteUser',UserPhonelistController.DeleteUsers)
   .get('/GetuserInformationbyTelNum',UserPhonelistController.GetuserInformationbyTelNum)
   .get('/GetuserInformationbyname',UserPhonelistController.GetuserInformationbyUsername)
-  
+  .get('/GetUserInformationByUserNameLIke',UserPhonelistController.GetUserInformationByUserNameLIke)
+
 
   
 //获取路由表

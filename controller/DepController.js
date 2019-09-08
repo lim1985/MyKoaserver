@@ -1,7 +1,35 @@
 const DepModel = require('../models/L_DepModels')
 
 class DepModelController {
+    static async SelectDepslistsbyLike(ctx)
+    {
+        const data=ctx.request.query
+        console.log(data)
+        const deplist=await DepModel.getListByDepNameLike(data.DPName)
+        console.log(deplist);
+        if(deplist=='')
+        {
+          ctx.body={
+              code:-1
+          }         
+        }
+        else
+        {
+            const list=deplist.map(item=>{
+                return {Depname:item.DepartmentName,DepID:item.DepartmentId,Per_Key:item.Permission_Key,DepKey:item.UploadDir,Per_ID:item.PID}
+            })
+            
+            ctx.body={
+                code:1,
+                res:list      
 
+            }  
+            console.log(list);
+        }
+      
+
+    
+    }
 
     static async selectAll_DepartmentByPermission_Key(ctx)
     {

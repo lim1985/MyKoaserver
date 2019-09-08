@@ -66,6 +66,7 @@ static async SelectPermissionInformationByRoleID(ctx)
                 }
     console.log(arr)
     ctx.body={
+        _PermissionsArr,
         res:arr,
         ore:_PermissionsArr
     }
@@ -306,7 +307,14 @@ static async findAllPermission(ctx)
         const flag = await PermissionModel.dbasync();
         const data=ctx.request.query
         //     console.log('11')
-        // console.log(data)
+        console.log(data)
+           if(!data.Permissionskey)
+           {
+               console.log('没有数据')
+              return false
+           }
+           else
+           {
         const result= await PermissionModel.findIDByPermissionName(data.Permissionskey)
         console.log(result)
             if(flag)
@@ -372,7 +380,7 @@ static async findAllPermission(ctx)
             }
       
     }
- 
+}
 }
 
 module.exports = PermissionController

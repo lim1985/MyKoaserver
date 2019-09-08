@@ -7,7 +7,11 @@ module.exports = function(sequelize, DataTypes) {
             allowNull:false,          
             primaryKey: true,
             autoIncrement: true        
-          },
+          },          
+          OrderID:{
+            type:DataTypes.INTEGER,
+              allowNull:false,             
+            },  
         DepID:{
         type:DataTypes.INTEGER,
           allowNull:false,

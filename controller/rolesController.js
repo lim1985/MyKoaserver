@@ -4,7 +4,6 @@ const PermissionModel = require('../models/L_PermissionModels')
 const DepModel = require('../models/L_DepModels')
 
 
-
 // const jwt = require('jsonwebtoken')
 // const secret = require('../config/secret.json')
 // const bcrypt = require('bcryptjs')
@@ -91,6 +90,8 @@ static async DeleterolesByID(ctx)
     
     if(flag==1)
     {
+      const res=await PermissionModel.DeleteOnePerinformationbyRoleID(data);
+      console.log(res);
         ctx.body={
             code:1,
             message:'删除角色成功'

@@ -281,6 +281,13 @@ static async SelectByRoleID(data)
                   raw:true              
             })
             .then(res=>{
+               if(!res[0].PermissionKey)
+               {
+                 let res=[];
+                 resolve(res);
+                 return ;
+               }
+            
               resolve(res)
             }).catch(function(reject)
             {           
@@ -419,7 +426,28 @@ static async SelectByRoleID(data)
             }
           })   
         }
-
+        static async DeleteOnePerinformationbyRoleID(data)
+        {
+          return new Promise((resolve,reject)=>{
+            try {       
+              console.log(data);            
+                Perinformation.destroy(
+                  {
+                    where:{                    
+                      RoleID:data.id                                 
+                    }
+                  }).then(res=>{
+                    if(res)
+                    {
+                      resolve(res);      
+                    }                   
+                  })               
+              
+            } catch (error) {
+              reject(error);
+            }
+          })
+        }
         static async DelPerinformation(data)
         {
           return new Promise((resolve,reject)=>{
@@ -440,7 +468,6 @@ static async SelectByRoleID(data)
             } catch (error) {
               reject(error);
             }
-
           })
         
          

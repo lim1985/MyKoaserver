@@ -168,7 +168,8 @@ class ReferenceUserModel {
     await ReferenceDEPUserPhones.create({
       'DepID': s.DepID,
       'status':6,//被引用状态
-      'UserPhoneID':s.UserPhoneID      
+      'UserPhoneID':s.UserPhoneID,
+      'OrderID':100   
     })
     return true
   }

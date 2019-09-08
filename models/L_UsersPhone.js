@@ -7,9 +7,13 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op
 const Deps = gov.import('../schema/LIM_Department')
 // const ReferenceDEPUserPhones = gov.import('../schema/LIM_ResferenceAndDep.js')
-Deps.belongsToMany(UsersPhone, {through: ResferenceUserPhoneAndDEP,sourceKey:'DepartmentId', foreignKey: 'DepID' })
-UsersPhone.belongsToMany(Deps, {through: ResferenceUserPhoneAndDEP ,sourceKey:'ID', foreignKey: 'UserPhoneID'})
-// Area.hasMany(Permission,{foreignKey:'areakey',sourceKey:'areakey',as:'Permission'});//area和Permission 表 1对多
+Deps.belongsToMany(UsersPhone, {through: ResferenceUserPhoneAndDEP, as:'ResferecDep',sourceKey:'DepartmentId', foreignKey: 'DepID'})
+//,order:[ ['OrderID', 'DESC'],]
+UsersPhone.belongsToMany(Deps, {through: ResferenceUserPhoneAndDEP, as:'ResferecDep' ,sourceKey:'ID', foreignKey: 'UserPhoneID'})
+//Area.hasMany(Permission,{foreignKey:'areakey',sourceKey:'areakey',as:'Permission'});//area和Permission 表 1对多
+// UsersPhone.hasMany(ResferenceUserPhoneAndDEP,{foreignKey:'UserPhoneID',sourceKey:'ID'});//area和Permission 表 1对多
+
+// UsersPhone.hasOne(ResferenceUserPhoneAndDEP)
 
 // gov.sync().then(function(result){
 //   console.log('部门和列表成员同步完成')
@@ -38,8 +42,8 @@ class UsersPhoneModel {
  */
 static async GetAllPhoneUserReferencUserByDepID(s)
 {
-      
-  let sql= `SELECT LIM_ResferenceAndDep.status AS Rstatus, LIM_UsersPhone.ID, LIM_UsersPhone.UserName, LIM_UsersPhone.Tel, 
+
+let sql= `SELECT LIM_ResferenceAndDep.status AS Rstatus, LIM_UsersPhone.ID, LIM_UsersPhone.UserName, LIM_UsersPhone.Tel, 
 LIM_UsersPhone.H_Tel, LIM_UsersPhone.cellphone, LIM_UsersPhone.H_cellphone, LIM_UsersPhone.QQ, 
 LIM_UsersPhone.avatar, LIM_UsersPhone.BirthDay, LIM_UsersPhone.Type, LIM_UsersPhone.OrderID, 
 LIM_UsersPhone.Sex, LIM_UsersPhone.GroupID, LIM_UsersPhone.Department_ID, LIM_UsersPhone.Permission_Key, 
@@ -50,7 +54,8 @@ FROM      LIM_UsersPhone INNER JOIN
 LIM_ResferenceAndDep ON LIM_UsersPhone.ID = LIM_ResferenceAndDep.UserPhoneID INNER JOIN
 LIM_Department ON LIM_ResferenceAndDep.DepID = LIM_Department.DepartmentId INNER JOIN
 LIM_Department AS LIM_Department_1 ON LIM_UsersPhone.Department_ID = LIM_Department_1.DepartmentId
-WHERE   (LIM_Department.DepartmentId = ${s.depid}) ORDER BY LIM_UsersPhone.OrderID DESC`
+WHERE   (LIM_Department.DepartmentId = ${s.depid}) ORDER BY LIM_ResferenceAndDep.OrderID DESC`
+
 
 //  `SELECT  LIM_ResferenceAndDep.status AS Rstatus, LIM_UsersPhone.ID, LIM_UsersPhone.UserName, LIM_UsersPhone.Tel, 
 //  LIM_UsersPhone.H_Tel, LIM_UsersPhone.cellphone, LIM_UsersPhone.H_cellphone, LIM_UsersPhone.QQ, 
@@ -129,9 +134,42 @@ static async GetPhoneUserByDepID(s)
        )
        return PhoneUserList
 }
+ 
+static async GetUserPhoneByDepID(s)
+{
+    let sql=`SELECT [LIM_Department].[Abbreviation], [LIM_Department].[DepartmentId], [LIM_Department].[Permission_Key], [LIM_Department].[Priority],
+    [LIM_Department].[UploadDir], [Users].[Email], [Users].[QQ],
+   [Users].[status], [Users].[UserName], [Users].[UJOB], [Users].[Tel], [Users].[OrderID], [Users].[ID], [Users].[cellphone],
+    [Users->LIM_ResferenceAndDep].[ID] AS [Users.LIM_ResferenceAndDep.ID], [Users->LIM_ResferenceAndDep].[OrderID] AS
+     [Users.LIM_ResferenceAndDep.OrderID], [Users->LIM_ResferenceAndDep].[DepID] AS [Users.LIM_ResferenceAndDep.DepID],
+      [Users->LIM_ResferenceAndDep].[status] AS [Users.LIM_ResferenceAndDep.status], [Users->LIM_ResferenceAndDep].
+      [UserPhoneID] AS [Users.LIM_ResferenceAndDep.UserPhoneID] FROM [LIM_Department] AS [LIM_Department] INNER JOIN 
+      ( [LIM_ResferenceAndDep] AS [Users->LIM_ResferenceAndDep] INNER JOIN [LIM_UsersPhone] AS [Users] ON [Users].[ID] =
+       [Users->LIM_ResferenceAndDep].[UserPhoneID]) ON [LIM_Department].[DepartmentId] = [Users->LIM_ResferenceAndDep].
+     [DepID] AND [Users].[status] = 9 WHERE [LIM_Department].[DepartmentId] = ${s.DepID}
+   ORDER BY [Users.LIM_ResferenceAndDep.OrderID] DESC`
+  
+    let count=`SELECT  count(*) AS [count] FROM [LIM_Department] AS [LIM_Department] INNER JOIN 
+     ( [LIM_ResferenceAndDep] AS [Users->LIM_ResferenceAndDep] INNER JOIN [LIM_UsersPhone] AS [Users] ON [Users].[ID] =
+      [Users->LIM_ResferenceAndDep].[UserPhoneID]) ON [LIM_Department].[DepartmentId] = [Users->LIM_ResferenceAndDep].
+    [DepID] AND [Users].[status] = 9 WHERE [LIM_Department].[DepartmentId] = ${s.DepID}`
+ 
+   return new Promise(async(resolve)=>{
+    let res={}
+    res.rows=await gov.query(sql,{type: gov.QueryTypes.SELECT})
+    let c=await gov.query(count,{type: gov.QueryTypes.SELECT})
+    res.count=c[0].count
+    resolve(res)
+  }).then(r=>{
+    console.log('返回数据成功！')
+  
+    console.log(r)
+    return r
+    
+  })
+}
 
-
-/**
+/**由于排序无法实现，暂停使用该方法
  * 查询部门用户
  * @param {key ,depid} s 
  * @returns {Promise.<*>}
@@ -140,6 +178,23 @@ static async GetPhoneUserByDepID(s)
  { 
   
         const PhoneUserList=await Deps.findAndCountAll({
+          as:'deps',
+          // order:[
+          //     [{model: UsersPhone,as:'Users'},{model: ResferenceUserPhoneAndDEP,as:'ResferecDep'}, 'OrderID', 'DESC']
+          // ],
+          // order: 'Users->Depres].[OrderID]'
+          //   // Will escape title and validate DESC against a list of valid direction parameters
+          //   ['Users->LIM_ResferenceAndDep', 'OrderID', 'DESC'],
+          //   // [{model: ResferenceUserPhoneAndDEP, as: 'resDep'}, 'OrderID', 'DESC'],
+          // ['Users','deps','OrderID', 'Desc'],
+          // [UsersPhone.associations.ResferenceUserPhoneAndDEP,  'OrderID', 'DESC'],
+          //  [{model: UsersPhone,as:'Users'},{model: ResferenceUserPhoneAndDEP,as:'resdep'}, 'OrderID', 'DESC']//,{model: ResferenceUserPhoneAndDEP}
+          //  [{model: ResferenceUserPhoneAndDEP},  'OrderID', 'DESC']
+            //  [Deps.associations.UsersPhone, 'OrderID', 'DESC'],
+          // [Deps.associations.ResferenceUserPhoneAndDEP, 'OrderID', 'DESC'],
+      
+         
+          //可以用
           attributes:['Abbreviation',
                       'DepartmentId',
                       'Permission_Key',
@@ -153,28 +208,29 @@ static async GetPhoneUserByDepID(s)
                       Sequelize.col('Users.Tel'),//内容
                       Sequelize.col('Users.OrderID'),//内容
                       Sequelize.col('Users.ID'),//内容
-                      Sequelize.col('Users.cellphone'),//内容
+                      Sequelize.col('Users.cellphone'),//内容                      
                     ],
           where:{
             DepartmentId:s.DepID
-          },
-          
+          },          
+         
           include:[{
-            model:UsersPhone,  
+            model:UsersPhone, 
+            // through: {
+            //   attributes: [],
+          
+            // }, 
             as:'Users',
             where:{
               status:9
-            },
-            attributes:[], 
-            through: {
-            
-              where: {status:-1}
-            }
+            },          
+            attributes:[],          
           }
          ], 
            raw:true  
         })
-        return PhoneUserList       
+        return PhoneUserList    
+        //可以用end   
  }
   /**
    * 查询用户信息
@@ -182,13 +238,39 @@ static async GetPhoneUserByDepID(s)
    * @returns {Promise.<*>}
    */
   static async findUserByPhoneNum (s) {
-    const userInfo = await UsersPhone.findOne({
+    const userInfo = await UsersPhone.findOne({      
+      as:'Users',
+      raw: true,
+      attributes:[
+            'Email',
+            'QQ',
+            'status',
+            'UserName',
+            'UJOB',
+            'Tel',
+            'OrderID',
+            'ID',
+            'cellphone',
+            // Sequelize.col('ResferecDep.Abbreviation'),//内容                       
+    ],
       where: {
         [Op.or]: [
            { cellphone : s.tel },
            { H_cellphone: s.tel }
-        ],
+        ],      
      },
+     include:[
+      {
+        model:Deps,
+        as:'ResferecDep',
+       through: {
+              
+    }, 
+    attributes:[
+      'Abbreviation'
+    ], 
+      }
+    ]
     })
     return userInfo
   }
@@ -200,13 +282,72 @@ static async GetPhoneUserByDepID(s)
   static async findUserByusername (s) {
     const userInfo = await UsersPhone.findOne({
       where:         
-           { UserName : s.username },
+           {
+              UserName : s.username 
+            },
+    })
+    return userInfo
+  }
+   /**
+   * 查询用户信息
+   * @param name  模糊姓名
+   * @returns {Promise.<*>}
+   */
+  static async findUserByusernamelike (s) {
+    const userInfo = await UsersPhone.findAndCountAll({
+    
+      as:'Users',
+      raw: true,
+      // limit: s.limit, // 每页多少条
+      // offset: s.offset ,// 跳过当前多少条
+      attributes:[
+                      // 'Abbreviation',
+                      // 'DepartmentId',
+                      // 'Permission_Key',
+                      // 'Priority',
+                      // 'UploadDir',
+                      'Email',
+                      'QQ',
+                      'status',
+                      'UserName',
+                      'UJOB',
+                      'Tel',
+                      'OrderID',
+                      'ID',
+                      'cellphone',
+                      // Sequelize.col('ResferecDep.Abbreviation'),//内容
+                      // Sequelize.col('ResferecDep.DepartmentId'),//内容
+                      // Sequelize.col('ResferecDep.Permission_Key'),//内容
+                      // Sequelize.col('ResferecDep.Priority'),//内容
+                      // Sequelize.col('ResferecDep.UploadDir'),//内容
+                                      
+                    ],
+      where:         
+           {
+              // UserName : s.username 
+              UserName: {
+                // 模糊查询
+                [Op.like]:'%' +s.username  + '%'
+              }
+            },
+            include:[
+              {
+                model:Deps,
+                as:'ResferecDep',
+               through: {
+              where:{
+                status:-1
+              }          
+            }, 
+            attributes:['Abbreviation'], 
+              }
+            ]
     })
     return userInfo
   }
     /**
    * 查询用户信息
-   * @param name  姓名
+   * @param name  用户ID
    * @returns {Promise.<*>}
    */
   static async findUserInformationByID (s) {
@@ -363,7 +504,8 @@ static async GetPhoneUserByDepID(s)
       ResferenceUserPhoneAndDEP.create({
        'UserPhoneID':res.ID,
        'DepID':res.DepID,
-       'status':-1
+       'status':-1,
+       'OrderID':99
       })      
     })
     return true

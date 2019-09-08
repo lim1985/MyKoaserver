@@ -3,8 +3,58 @@ const gov = db.gov
 const DEP = gov.import('../schema/LIM_Department.js')
 const Perinformation = gov.import('../schema/LIM_PermissionInformation.js')
 const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 DEP.belongsTo(Perinformation, { foreignKey: 'DepartmentId', targetKey: 'DepID', as: 'DepInformation' });
 class DepartmentModel {
+
+
+ /**
+  * like 模糊查找部门 
+  * @param string
+  * @return {Promise.<Array>}
+  * 
+  */
+    static async getListByDepNameLike(data)
+    {
+    return new Promise((resolve,reject)=>{
+      try {
+        DEP.findAll({
+          raw: true,
+          limit: 10,
+           order: [
+               ['Priority', 'DESC']
+           ],  // 排序
+           where: {
+             // name: 'cheny', // 精确查询
+             [Op.and]:{
+              status:1
+             },
+             [Op.or]:[
+              {  
+                 DepartmentName: {
+                // 模糊查询
+                [Op.like]:'%' +data + '%'
+              }
+            },
+            {  
+               Abbreviation: {
+              // 模糊查询
+              [Op.like]:'%' +data + '%'
+            }
+          }
+             ],          
+           },
+          //  attributes:['id','name'] // 控制查询字段
+         }).then(res=>{
+           resolve(res)
+         })
+      } catch (error) {
+        reject(error)
+      }
+    })      
+    }
+
+
    /**
    * 删除部门
    * @param role

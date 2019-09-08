@@ -36,7 +36,7 @@ app.use(cors())
 //   await next();
 //  });
 app.use(bodyparser())
-// 给下面加上该属性 JWT 将不起作用 passthrough:true
+//给下面加上该属性 JWT 将不起作用 passthrough:true
 
 
 app 

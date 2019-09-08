@@ -110,14 +110,18 @@ class UserPhoneController {
     let _phoneUserList=[]
     let _arr=[]  
     let count=0
+    let tempArr=[]
     for(let x in params)
     {
         // status:_status,depid:_depid,key:_key,
-        let result=await userPhoneModel.GetPhoneUserByDepIDAndPermissionKey({DepID:params[x].DepID,key:params[x].key,offset:offset,limit: limit,status:params[x].status})   
-        count=count+result.count
-        if(result.count>0)
+        // let result=await userPhoneModel.GetPhoneUserByDepIDAndPermissionKey({DepID:params[x].DepID,key:params[x].key,offset:offset,limit: limit,status:params[x].status})   
+        let res2=await userPhoneModel.GetUserPhoneByDepID({DepID:params[x].DepID,key:params[x].key,offset:offset,limit: limit,status:params[x].status})
+        // tempArr.push(result);
+        tempArr.push(res2);
+        count=count+res2.count
+        if(res2.count>0)
                  {
-                     _arr.push(result.rows)
+                     _arr.push(res2.rows)
                  }
                 
     }
@@ -128,7 +132,9 @@ class UserPhoneController {
             _phoneUserList.push(v[x])
         }        
     });
+    
       const result={
+        tempArr,
         pageNo:pageNo*1,
         pageSize:pageSize*1,
         data:_phoneUserList,
@@ -367,9 +373,18 @@ static async AdduserPhones(ctx)
  static async GetuserInformationbyTelNum(ctx)
  {
      const data=ctx.request.query
+     console.log(data)
+     let pages=JSON.parse(data.parameter);  
+     const pageNo=pages.pageNo       
+     const pageSize=pages.pageSize
+     const offset=(pageNo-1) * pageSize     
+     const limit=pageSize * 1
      let obj=new Object();
      obj.tel=data.data;
+     obj.offset=offset;
+     obj.limit=limit
      const result=await userPhoneModel.findUserByPhoneNum(obj)  
+     console.log(result);
      if(!result)
      {
          ctx.body={
@@ -378,12 +393,68 @@ static async AdduserPhones(ctx)
      }  
      else
      {
+        const res={
+            pageNo:pageNo*1,
+            pageSize:pageSize*1,
+            data:[result],
+            totalCount:1,
+            totalPage:1
+        }
         ctx.body={
             code:1,
-            res:result
+            isNum:true,
+            res:res
           }
      }
         
+ }
+ static async GetUserInformationByUserNameLIke(ctx)
+ {
+    const data=ctx.request.query     
+    let pages=JSON.parse(data.parameter);
+  
+    // console.log(data.parameter['PageNo'])
+    // console.log(data.parameter)
+    // console.log(data.parameter[pageNo])
+    // console.log(data.parameter[PageNo])
+    const pageNo=pages.pageNo       
+    const pageSize=pages.pageSize
+    const offset=(pageNo-1) * pageSize     
+    const limit=pageSize * 1
+     
+     let obj=new Object();
+     obj.username=data.data;
+     obj.offset=offset;
+     obj.limit=limit
+     const result=await userPhoneModel.findUserByusernamelike(obj)  
+     if(result.count==0)
+     {
+         ctx.body={
+             code:-1
+         }         
+     }  
+     else
+     {
+
+
+        // pageNo:pageNo*1,
+        // pageSize:pageSize*1,
+        // data:_phoneUserList,
+        // totalCount:count,
+        // totalPage:parseInt(count/pageSize)
+
+        const res={
+            pageNo:pageNo*1,
+            pageSize:pageSize*1,
+            data:result.rows,
+            totalCount:result.count,
+            totalPage:parseInt(result.count/pageSize)
+        }
+        ctx.body={
+            code:1,
+            res:res
+          }
+     }  
  }
  static async GetuserInformationbyUsername(ctx)
  {

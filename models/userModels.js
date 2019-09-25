@@ -1,6 +1,10 @@
 const db = require('../config/db')
 const gov = db.gov
 const Admin = gov.import('../schema/PE_Admin.js')
+const AdminLogin = gov.import('../schema/LIM_Admin_Login.js')
+
+Admin.hasOne(AdminLogin,{ foreignKey: 'AdminID' })
+
 // const LIM_Roles = gov.import('../schema/LIM_Roles.js')
 // const LIM_Reference_AdminRoles = gov.import('../schema/LIM_Reference_AdminRoles.js')
 // const Area = gov.import('../schema/LIM_Area')
@@ -17,8 +21,61 @@ const Admin = gov.import('../schema/PE_Admin.js')
 
 
 class AdminModel {
-
+  static async findAdminByIDcard(userinfo)
+  {
+     return new Promise ((resolve,resject)=>{
+       Admin.findOne({
+         include:[
+           {
+             model:AdminLogin, 
+             where:{
+              IDCard:userinfo.certificateNum
+             }
+           }
+         ]
+       }).then(res=>{
+         !res?resolve({
+           Isadmin:false,
+           res
+         }):resolve({
+           Isadmin:true,
+           res
+         })
+            
+       })
+      
+     })
+  }
+   static async findAdminByPhone(phone)
+   {
+      return new Promise ((resolve,resject)=>{
+        Admin.findOne({
+          include:[
+            {
+              model:AdminLogin, 
+              where:{
+                Phone:phone.mobile
+              }
+            }
+          ]
+        }).then(res=>{
+          !res?resolve({
+            Isadmin:false,
+            res
+          }):resolve({
+            Isadmin:true,
+            res
+          })
+          // if(res)
+          // {
+          //   resolve(true)
+          // }         
+        })
+       
+      })
+   }
    /**
+    * 
    * 查询一个用户信息
    * @param name  姓名
    * @returns {Promise.<*>}

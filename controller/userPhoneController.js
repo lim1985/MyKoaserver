@@ -5,7 +5,58 @@ const referenceUserModel = require('../models/L_ReferenceUserModel')
 class UserPhoneController {
 
 
-
+    static async sortUserPhoneList(ctx)
+    {
+        const data=ctx.request.body;
+        const Count=data.length;
+        // console.log(count)     
+        let result=async()=>{
+            return new Promise((resolve)=>{
+              let _count=data.length;
+              let count=data.length;
+              let all=0
+              data.forEach(item=>{
+                  console.log(item);
+                userPhoneModel.SortUserByDepID(item).then(res=>{ 
+                    // console.log(res)                  
+                  
+                     if(res[0]==1)
+                     {
+                        _count--
+                        all++
+                     }  
+                    console.log(all+'/'+count)
+                    console.log(_count)
+                     if(_count==0 && all==count)
+                     {
+                        console.log('success')
+                        resolve('success') 
+                     }                                                 
+                })
+                  
+              })   
+                
+            })
+        }
+        // data.forEach(async item => {
+        //  userPhoneModel.SortUserByDepID(item).then(res=>{        
+        //     if(res==1)
+        //     {
+        //       count--
+        //       if(count==0)
+        //       {
+        //         status.code=0            
+        //       }
+        //     }          
+        //  })           
+        // });
+        // const result=await userPhoneModel.SortUserByDepID(data)
+        let res=await result();
+        ctx.body={
+            res
+        }
+        // console.log(count);
+    }
 
     static async DeleteUsers(ctx)
     {
@@ -75,56 +126,55 @@ class UserPhoneController {
     // GetPhoneUserByDepIDAndPermissionKey
    static async GetByDepIDAndPermissionKey(ctx)
    {
-    const res=ctx.request.query
-    // const data =ctx.request.body
-    // console.log(data)
-    const _depid=res.DepID
-    const _key=res.key
-    const _status=res.status
-    const pageNo=res.pageNo       
-    const pageSize=res.pageSize
-    const offset=(pageNo-1) * pageSize     
-    const limit=pageSize * 1
-    const UserPhonelist=await userPhoneModel.GetPhoneUserByDepIDAndPermissionKey({status:_status,DepID:_depid,key:_key,offset:offset,limit: limit }) 
-    const result={
-        pageNo:pageNo*1,
-        pageSize:pageSize*1,
-        data:UserPhonelist.rows,
-        totalCount:UserPhonelist.count,
-        totalPage:parseInt(UserPhonelist.count/pageSize)
-    }
-    ctx.body={
-        code:1,
-        result:result
-    }
+        const res=ctx.request.query
+        // const data =ctx.request.body
+        // console.log(data)
+        const _depid=res.DepID
+        const _key=res.key
+        const _status=res.status
+        const pageNo=res.pageNo       
+        const pageSize=res.pageSize
+        const offset=(pageNo-1) * pageSize     
+        const limit=pageSize * 1
+        const UserPhonelist=await userPhoneModel.GetPhoneUserByDepIDAndPermissionKey({status:_status,DepID:_depid,key:_key,offset:offset,limit: limit }) 
+        const result={
+            pageNo:pageNo*1,
+            pageSize:pageSize*1,
+            data:UserPhonelist.rows,
+            totalCount:UserPhonelist.count,
+            totalPage:parseInt(UserPhonelist.count/pageSize)
+        }
+        ctx.body={
+            code:1,
+            result:result
+        }
    }
    static async PostByDepIDAndPermissionKey(ctx)
    {
-    const res=ctx.request.body     
-    console.log(res)
-    const pageNo=res.pageNo       
-    const pageSize=res.pageSize
-    const offset=(pageNo-1) * pageSize     
-    const limit=pageSize * 1  
-    const params=res.param
-    let _phoneUserList=[]
-    let _arr=[]  
-    let count=0
-    let tempArr=[]
-    for(let x in params)
-    {
-        // status:_status,depid:_depid,key:_key,
-        // let result=await userPhoneModel.GetPhoneUserByDepIDAndPermissionKey({DepID:params[x].DepID,key:params[x].key,offset:offset,limit: limit,status:params[x].status})   
-        let res2=await userPhoneModel.GetUserPhoneByDepID({DepID:params[x].DepID,key:params[x].key,offset:offset,limit: limit,status:params[x].status})
-        // tempArr.push(result);
-        tempArr.push(res2);
-        count=count+res2.count
-        if(res2.count>0)
-                 {
-                     _arr.push(res2.rows)
-                 }
-                
-    }
+        const res=ctx.request.body     
+        console.log(res)
+        const pageNo=res.pageNo       
+        const pageSize=res.pageSize
+        const offset=(pageNo-1) * pageSize     
+        const limit=pageSize * 1  
+        const params=res.param
+        let _phoneUserList=[]
+        let _arr=[]  
+        let count=0
+        let tempArr=[]
+        for(let x in params)
+        {
+            // status:_status,depid:_depid,key:_key,
+            // let result=await userPhoneModel.GetPhoneUserByDepIDAndPermissionKey({DepID:params[x].DepID,key:params[x].key,offset:offset,limit: limit,status:params[x].status})   
+            let res2=await userPhoneModel.GetUserPhoneByDepID({DepID:params[x].DepID,key:params[x].key,offset:offset,limit: limit,status:params[x].status})
+            // tempArr.push(result);
+            tempArr.push(res2);
+            count=count+res2.count
+            if(res2.count>0)
+            {
+                _arr.push(res2.rows)
+            }                
+        }
     console.log(count)    
     _arr.forEach(v => {
         for(let x in v)
@@ -153,14 +203,12 @@ class UserPhoneController {
      */
     static async GetAllUserPhoneListByPermissionKey(ctx)
     {
-        const res=ctx.request.query
-       
+        const res=ctx.request.query       
         const _key=res.key
         const pageNo=res.pageNo       
         const pageSize=res.pageSize
         const offset=(pageNo-1) * pageSize     
         const limit=pageSize * 1
-
         const UserPhonelist=await userPhoneModel.GetallUserPhoneByPermissionKey({key:_key,offset:offset,limit: limit }) 
           
             for(let x in UserPhonelist.rows)

@@ -7,6 +7,10 @@ const DepartmentController = require('../controller/DepController')
 const UserPhonelistController = require('../controller/userPhoneController')
 const ReferenceUserController = require('../controller/ReferenceUserController')
 const CustomGroupController = require('../controller/CustomGroupController')
+const SmsRouter = require('../controller/sendsmsAction')
+const WxRouter = require('../controller/WxContorller')
+
+
 
 
 
@@ -16,8 +20,12 @@ const router = new Router({
 })
 
 router
+//微信相关路由
+  .get('/GetCode', WxRouter.GettokenCode) // 注册
+//短信验证登陆方法
+  .get('/GetVerificatCode',SmsRouter.GetVerificatCode)
 //admin
-  .post('/login', UserController.myLogin)  // 登录
+  // .post('/login', UserController.myLogin)  // 登录
   .post('/createUser', UserController.createUser) // 注册
   .get('/userInfo', UserController.GetUserName) // 获取用户信息
   .get('/login', UserController.myLogin) 
@@ -67,6 +75,11 @@ router
   .post('/UpdatePhoneUser',UserPhonelistController.UpdateUserPhoneinformation)
   .post('/AddPhoneUser',UserPhonelistController.AdduserPhones)
   .post('/GetUserByNameAndDepID',UserPhonelistController.GetUserByNameAndDepID)
+  .post('/SortUserPhoneList',UserPhonelistController.sortUserPhoneList)
+
+
+
+  
   //批量导入通讯录用户
   .post('/importUsersList',UserPhonelistController.importUsersListfromExcle)
 

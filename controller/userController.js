@@ -8,7 +8,7 @@ const DepModel = require('../models/L_DepModels')
 const DepMemberModel = require('../models/L_DepMemberModels')
 
 class UserController {
-  
+
   /**
    * 登录
    * @param ctx
@@ -16,10 +16,87 @@ class UserController {
    */
   static async myLogin (ctx)
   {
-           const data=ctx.request.body       
-           ctx.body=data
-     
+          //  const data=ctx.request.body 
+          const data=ctx.request.query;
+          console.log(data);
+          // if(data.captcha!=ctx.session.vv)
+          // {
+          //   ctx.body={
+          //     code:-1
+          //   }
+          // }
+          // else
+          if(data.phone && data.certificateNum)
+          {
+           const Admin=await userModel.findAdminByIDcard(data);
+           console.log(Admin);
+           if(Admin.Isadmin)
+           {
+            //可以登录了清除session
+             const userToken = {
+               name: Admin.res.AdminName,
+               AdminID: Admin.res.AdminID
+             }
+             const token = jwt.sign(userToken, secret.sign, {expiresIn: '2h'})  // 签发token
+           //  console.log(token)
+           ctx.body={
+               username:Admin.res.AdminName,
+               token:token,
+               message:'登陆成功',
+               code:1,
+               userinfo:Admin.res                           
+             }
+           }
+           else
+           {
+             ctx.body={
+               message:'该用户不是管理员，如需申请请喝系统管理员联系。'
+             }
+           }
+          
+            // ctx.body={
+            //   code:1,
+            //   msg:'可以的手机号正常'
+            // }
+          }
+          else if(data.mobile)        
+          {
+            if(data.captcha!=ctx.session.vv)
+            {
+              //如果验证码错误返回 验证码失效字样
+              ctx.body={
+                message:'验证码失效',
+                code:-1
+              }
+            }
+            else
+            {//验证码有效并且正确就进入登陆流程
+            const Admin=await userModel.findAdminByPhone(data);
+              if(Admin.Isadmin)
+              {
+                 ctx.session.vv=""//可以登录了清除session
+                const userToken = {
+                  name: Admin.res.AdminName,
+                  AdminID: Admin.res.AdminID
+                }
+                const token = jwt.sign(userToken, secret.sign, {expiresIn: '2h'})  // 签发token
+              //  console.log(token)
+              ctx.body={
+                  username:Admin.res.AdminName,
+                  token:token,
+                  message:'登陆成功',
+                  code:1,
+                  userinfo:Admin.res,
+                              
+                }
+              }
+            }
+            
+          }
+           else if(data.username)
+          {
         const user = await userModel.findUserByName(data.username) 
+        console.log(user);
          if (user)
          {
              if (data.password===user.dataValues.AdminPassword)
@@ -35,7 +112,8 @@ class UserController {
                     token:token,
                     message:'登陆成功',
                     code:1,
-                    userinfo:user.dataValues
+                    userinfo:user,
+                    user
                    
                 }
              }
@@ -58,7 +136,7 @@ class UserController {
          }
         //  console.log(user)
         //  ctx.body=user.dataValues
-      
+      }
 
   }
   static async GetallAdminlist(ctx)

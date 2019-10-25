@@ -1,6 +1,7 @@
 const db = require('../config/db')
 const gov = db.gov
 const DEP = gov.import('../schema/LIM_Department.js')
+const UsersPhone = gov.import('../schema/LIM_UsersPhone.js')
 const Perinformation = gov.import('../schema/LIM_PermissionInformation.js')
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
@@ -62,37 +63,154 @@ class DepartmentModel {
    */
   static async PostDel (data) {
     return  new Promise((resolve,reject)=>{
-      try {     
-        DEP.destroy({where:{DepartmentId:data.DepartmentId}}).then(res=>
+        try {
+        //   UsersPhone.findAndCount({where:{DepartmentId:data.DepartmentId}})
+        //   .then(Users=>{
+        //           console.log(Users)
+        //           resolve(Users)
+        //   })
+        // } 
+        UsersPhone.findAndCount({
+          where:{
+            Department_ID:data.DepartmentId
+          }
+        }).then(Users=>{
+          console.log(Users)
+          if(Users.count>=1)//部门下存在联系人
           {
-            console.log(res)
-            resolve(res)
-          }).catch(function(reject)
+            resolve(-2)
+          }
+          else
           {
-            console.log(reject)
-            return reject()
+
+         DEP.destroy({where:{DepartmentId:data.DepartmentId}}).then(res=>{//先删除部门表里的
+            return res 
+          }).then(IsDelDep=>{
+            if(IsDelDep)
+            {
+              Perinformation.findAll({
+                      where:{
+                        DepID:data.DepartmentId
+                      }
+              })
+              .then(infos=>{
+                if(JSON.stringify(infos)=='[]')
+                  {
+                      resolve(true)
+                  }
+                  else
+                  {
+                    Perinformation.destroy({
+                              where:{
+                                DepID:data.DepartmentId
+                              }
+                            })
+                      .then(IsDelInfo=>{
+                          if(IsDelInfo>=1)
+                          {
+                            resolve(true)
+                          }
+                      })
+                  }
+              })
+            }
           })
-      } catch (error) {
-        reject(error)
-      }
-    })   
-  }
+          }
+        })
+        } 
+        catch (error) {
+          reject(error)
+        }
+  })
+}
+        // DEP.destroy({where:{DepartmentId:data.DepartmentId}}).then(res=>
+        //   {
+        //    return res          
+        //   }).then(IsDelDep=>{
+        //     console.log(IsDelDep)
+        //     if(IsDelDep)
+        //     {
+        //     Perinformation.findAll({
+        //       where:{
+        //         DepID:data.DepartmentId
+        //       }
+        //     }).then(infos=>{
+        //       if(JSON.stringify(infos)=='[]')
+        //       {
+        //         resolve(true)
+        //       }
+        //       else
+        //       {
+        //        Perinformation.destroy({
+        //         where:{
+        //           DepID:data.DepartmentId
+        //         }
+        //       }).then(DelInfo=>{
+        //         if(DelInfo==1)
+        //         {
+        //           resolve(true)
+        //         }
+                
+        //         console.log(DelInfo);
+        //       })
+        //       }
+       
+        //     })
+          
+        //       // Perinformation.destroy({
+        //       //   where:{
+        //       //     DepID:data.DepartmentId
+        //       //   }
+        //       // }).then(IsDelInfo=>{
+        //       //   console.log(IsDelInfo);
+        //       //   return IsDelInfo
+        //       //   // resolve(IsDelInfo);
+        //       // })
+        //     }
+        //   })
+          // .catch(function(reject)
+          // {
+          //   console.log(reject)
+          //   return reject()
+          // })
+  
 
 
   static async PostUpdate(data)
   {
     return  new Promise((resove,reject)=>{
       try {     
+        console.log(data);
         DEP.update(data,{where:{DepartmentId:data.DepartmentId}}).then(res=>
           {
-            console.log(res)
-            resove(res)
-          }).catch(function(reject)
+            console.log(res);
+          return res
+          }).then(DepisUpdated=>{
+
+            if(DepisUpdated)
+            {
+              Perinformation.update({PermissionKey:data.Permission_Key},{
+                where:{
+                  DepID:data.DepartmentId
+                }
+              })
+              .then(isUpdate=>{
+                if(isUpdate)
+                {
+                  resove(isUpdate)
+                }           
+              })
+            }         
+          })
+          
+          .catch(function(reject)
           {
             console.log(reject)
             return reject()
           })
-      } catch (error) {
+      }
+      
+      catch (error) {
         reject(error)
       }
     })
@@ -104,10 +222,13 @@ class DepartmentModel {
   static async QueryFindCountAllDEP(ctx)
   {   
     let count=` SELECT count([LIM_Department].[DepartmentId]) AS [count] FROM [LIM_Department] AS [LIM_Department]`
-    let sql=`SELECT   LIM_Permission.ID, LIM_Permission.RoleID, LIM_Permission.Permission_Key, LIM_Permission.Permission_name, 
+    let sql=`SELECT LIM_Permission.ID, LIM_Permission.RoleID, LIM_Permission.Permission_key, LIM_Permission.Permission_name, 
     LIM_Permission.description, LIM_Permission.optioncode, LIM_Permission.OrderID, LIM_Department.DepartmentId, 
     LIM_Department.DepartmentName, LIM_Department.Abbreviation, LIM_Department.UploadDir, 
-    LIM_Department.ParentDepartmentId, LIM_Department.Priority FROM LIM_Department LEFT OUTER JOIN LIM_Permission ON LIM_Department.Permission_Key = LIM_Permission.Permission_Key ORDER BY LIM_Department.DepartmentId desc`
+    LIM_Department.ParentDepartmentId, LIM_Department.Priority, LIM_Department.PID, LIM_Department.status
+FROM      LIM_Department LEFT OUTER JOIN
+    LIM_Permission ON LIM_Department.Permission_Key = LIM_Permission.Permission_key
+ORDER BY LIM_Department.DepartmentId DESC`
     return new Promise(async(resolve,reject)=>{
         let res={}
            res.rows=await gov.query(sql,{type : gov.QueryTypes.SELECT})
@@ -213,11 +334,15 @@ static async selectAll_DepartmentByPermission_Key(s,roleid)
         // ['Permission_Key','Permissionkey'],
         'DepartmentId',
         'Permission_Key',
-        'UploadDir'
-        
+        'UploadDir'        
+      ],
+
+      order:[
+        ['Priority','Desc']
       ],
         where: {
-          Permission_Key:s
+          Permission_Key:s,
+          status:1
         },      
         include: [{
             model: Perinformation,
@@ -288,7 +413,9 @@ static async findOne_DepartmentByDepartmentID(s)
       'Abbreviation': s.Abbreviation,
       'ParentDepartmentId': s.ParentDepartmentId,
       'Priority': s.Priority,
-      'Number': s.Number,     
+      'Number': s.Number,   
+      'PID': s.PID,
+      'status': 1,     
     })
     return true
   }

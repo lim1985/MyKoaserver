@@ -339,8 +339,7 @@ class UserPhoneController {
                 H_cellphone:data.H_cellphone,
                 QQ:data.QQ,
                 Email:data.Email,
-                Py_Index:data.Py_Index
-              
+                Py_Index:data.Py_Index              
         }
         // s.DepID,
         // s.UserPhoneID
@@ -377,8 +376,7 @@ class UserPhoneController {
              code:-4,
              msg:'该单位已经存在联系人,操作失败'
          }
-     }
-        
+     }        
     }
 /**
  * 新建用户通讯录方法
@@ -459,22 +457,37 @@ static async AdduserPhones(ctx)
  static async GetUserInformationByUserNameLIke(ctx)
  {
     const data=ctx.request.query     
-    let pages=JSON.parse(data.parameter);
-  
-    // console.log(data.parameter['PageNo'])
-    // console.log(data.parameter)
-    // console.log(data.parameter[pageNo])
-    // console.log(data.parameter[PageNo])
-    const pageNo=pages.pageNo       
-    const pageSize=pages.pageSize
+    console.log(data.parameter )
+    let pages
+    let pageNo
+    let pageSize
+    if(data.parameter)
+    {
+        pages=JSON.parse(data.parameter);  
+        pageNo=pages.pageNo       
+        pageSize=pages.pageSize
+    }
+    pageNo=1;
+    pageSize=10;   
     const offset=(pageNo-1) * pageSize     
-    const limit=pageSize * 1
-     
-     let obj=new Object();
-     obj.username=data.data;
-     obj.offset=offset;
-     obj.limit=limit
-     const result=await userPhoneModel.findUserByusernamelike(obj)  
+    const limit=pageSize * 1   
+    let result  
+    let obj=new Object();
+    obj.username=data.data;
+    obj.offset=offset;
+    obj.limit=limit
+     if(data.DepID)
+     {
+         obj.DepID=data.DepID
+         result=await userPhoneModel.findUserByusernameAndDepIDlike(obj)
+         console.log(result)
+     } 
+     else
+     {
+         result=await userPhoneModel.findUserByusernamelike(obj)  
+     }
+
+       
      if(result.count==0)
      {
          ctx.body={
@@ -498,6 +511,7 @@ static async AdduserPhones(ctx)
             totalCount:result.count,
             totalPage:parseInt(result.count/pageSize)
         }
+        console.log(res);
         ctx.body={
             code:1,
             res:res

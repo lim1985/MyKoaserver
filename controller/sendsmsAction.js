@@ -79,9 +79,13 @@ class sendsmsClass {
        }
        else
        {
-        let Randomnum=Math.random().toString().slice(-6);            
-        ctx.session.vv=Randomnum     
-        let contents=`【区融媒体中心】您的手机验证码为${Randomnum}。若非本人操作，请忽略本短信，也可以拨打电话：0739-5396272咨询。`
+        let Randomnum=Math.random().toString().slice(-6);  
+        // ctx.cookies.set('vv',Randomnum,1,{}); 
+        //set(key, sess, maxAge, { rolling, changed })     
+        // ctx.cookies.set({"vv":Randomnum},'sess',100,{})
+        await ctx.cookies.set("vv",Randomnum,{maxAge:60*4*1000, httpOnly:true});
+            // ctx.session.vv=Randomnum     
+        let contents=`【区融媒体中心】验证码为${Randomnum}。若非本人操作，请忽略本短信，也可以拨打电话：0739-5396272咨询。`
         let smsapi="api.smsbao.com"
         let sms_u = "limannlee";
         let sms_c = contents;

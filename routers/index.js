@@ -46,6 +46,7 @@ router
   .get('/admininfo',AdminRolesController.GetAdminRolesPermission)
   .get('/GetrolesbyAdminID',AdminRolesController.GetroleslistbyAdminID)
   .get('/GetAllRolesDepIDPermission',AdminRolesController.GetAdminRolesPermissionDepID)
+  .get('/GetDyNamicRoutesByAdminID',AdminRolesController.GetDynamicRoutesByAdminID)
   
     //PermissionController
   .get('/PermissionAdd',PermissionController.AddPermission)

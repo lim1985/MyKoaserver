@@ -37,7 +37,7 @@ class UserController {
                name: Admin.res.AdminName,
                AdminID: Admin.res.AdminID
              }
-             const token = jwt.sign(userToken, secret.sign, {expiresIn: '2h'})  // 签发token
+             const token = jwt.sign(userToken, secret.sign, {expiresIn: '24h'})  // 签发token
            //  console.log(token)
            ctx.body={
                username:Admin.res.AdminName,
@@ -61,7 +61,7 @@ class UserController {
           }
           else if(data.mobile)        
           {
-            if(data.captcha!=ctx.session.vv)
+            if(data.captcha!=ctx.cookies.get('vv'))
             {
               //如果验证码错误返回 验证码失效字样
               ctx.body={
@@ -79,15 +79,15 @@ class UserController {
                   name: Admin.res.AdminName,
                   AdminID: Admin.res.AdminID
                 }
-                const token = jwt.sign(userToken, secret.sign, {expiresIn: '2h'})  // 签发token
+                const token = jwt.sign(userToken, secret.sign, {expiresIn: '24h'})  // 签发token
               //  console.log(token)
+              // ctx.session.token=token;
               ctx.body={
                   username:Admin.res.AdminName,
                   token:token,
                   message:'登陆成功',
                   code:1,
-                  userinfo:Admin.res,
-                              
+                  userinfo:Admin.res,                              
                 }
               }
             }
@@ -281,7 +281,7 @@ class UserController {
            const limit=pageSize * 1
            const infor=[];
            const deps=[];
-           const Permissionlist=await PermissionModel.findPermiss({status:1, offset:offset,limit: limit })        
+           const Permissionlist=await PermissionModel.findPermissIsshow({status:1, offset:offset,limit: limit })        
            for(let x in Permissionlist.rows)
            {
             // console.log(Permissionlist.rows[x].Permission_key)    
@@ -335,7 +335,7 @@ class UserController {
            const pageSize=res.pageSize
            const offset=(pageNo-1) * pageSize   
            const limit=pageSize * 1
-           const Permissionlist=await PermissionModel.findPermiss({ offset:offset,limit: limit }) 
+           const Permissionlist=await PermissionModel.findPermiss({status:1, offset:offset,limit: limit }) 
         
           //  console.log(Pesrmissionlist.rows);       
            for(let x in Permissionlist.rows)

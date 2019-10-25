@@ -13,6 +13,7 @@ class RolesController {
  {
     const iid=ctx.request.query.AdminID
     const userinfo=await userModel.findUserByAminID(iid)
+   
     // console.log(userinfo)
     if(!userinfo)
     {
@@ -30,6 +31,661 @@ class RolesController {
         }
    }
  }
+  
+ static groupifyWithArray(arr) {
+    let ret = {};
+    // 先把父节点与子节点分开
+    let parents = [];
+    let subs = [];
+    arr.forEach(function (item){
+        let key = item.Permission_key;
+        if (item.IsParent) {
+            ret[key] = item;
+            item.children = [];
+            parents.push(item);
+        } else {
+            subs.push(item);
+        }
+    });
+    // 遍历子，放到相应的父节点中
+    subs.forEach(function (item){
+        let key = item.Permission_key;
+        let parent = ret[key];
+        if (parent) {
+            parent.children.push(item);
+        }
+    });
+
+    return parents;
+}
+static groupifyWithArrayAndQC(arr) {
+    let ret = {};
+    let qsub = {};
+    // 先把父节点与子节点分开
+    let parents = [];
+    let subs = [];
+    arr.forEach(function (item){
+        let key = item.Permission_key;
+        if (item.IsParent) {
+            if (ret[key]) {
+                return;
+            }
+            ret[key] = item;
+            item.children = [];
+            parents.push(item);
+        } else {
+            subs.push(item);
+        }
+    });
+    // 遍历子，放到相应的父节点中
+    subs.forEach(function (item){
+        let key = item.Permission_key;
+        let parent = ret[key];
+        if (parent) {
+            let subKey = item["Perinformation.Deps.DepartmentId"];
+            if(qsub[subKey]) {
+                return;
+            }
+            qsub[subKey] = true;
+            parent.children.push(item);
+        }
+    });
+
+    return parents;
+}
+ static async GetDynamicRoutesByAdminID(ctx)
+ {
+
+    // const adminList={
+    //     path: '/DepartmentManager',
+    //     name: 'DepartmentManager',
+    //     redirect: '/Department/manager',
+    //     component: PageView,
+    //     meta: { title: '管理', icon: 'dashboard', permission: [ 'Admin' ] },
+    //     children: [
+    //       {      
+    //             path: '/CMCCSend/send',
+    //             name: 'CMCCSend',
+    //             component: () => import('@/views/list/modules/sendSMS/cmccSendSms'),
+    //             meta: { title: '移动发短信' , permission: [ 'Admin' ] }
+    //       },
+    //       {
+    //         path: '/Department/manager',
+    //         name: 'Department',
+    //         component: () => import('@/views/list/Department'),
+    //         meta: { title: '部门管理', permission: [ 'Admin' ] }
+    //       },
+    //       {
+    //         path: '/list/uploadUserlist',
+    //         name: 'UploadUserlist',
+    //         component: () => import('@/views/list/UploadUserlist'),
+    //         meta: { title: '联系人批量导入', permission: [ 'Admin' ] }
+    //       },
+    //       // {
+    //       //   path: '/list/old-permission',
+    //       //   name: 'old-permission',
+    //       //   component: () => import('@/views/list/oldPermissionList'),
+    //       //   meta: { title: '原版权限管理', permission: [ 'Admin' ] }
+    //       // },
+    //       {
+    //         path: '/list/user-list',
+    //         name: 'UserList',
+    //         component: () => import('@/views/list/UserList'),
+    //         meta: { title: '用户管理', permission: [ 'Admin' ] }
+    //       },
+    //       {
+    //         path: '/list/role-list',
+    //         name: 'RoleList',
+    //         component: () => import('@/views/list/RoleList'),
+    //         meta: { title: '角色管理', permission: [ 'Admin' ] }
+    //       },
+    //       {
+    //         path: '/list/permission-list',
+    //         name: 'PermissionList',
+    //         component: () => import('@/views/list/PermissionList'),
+    //         meta: { title: '部门类别管理', permission: [ 'Admin' ] }
+    //       },
+    //     ]
+    //   }
+    //   {
+    //     path: '/list/QW',
+    //     name: 'QW',   
+    //     redirect: {name:'Phonelist_QW'},
+    //     component: PageView,
+    //     meta: { title: '区委', icon: 'dashboard', permission: [ 'QW','edit' ] },
+    //     children: [
+    //       {
+    //         path: '/list/UserPhonelist/152',          
+    //         name: 'Phonelist_QW',
+    //         // component: () => import('@/views/list/UserPhonelist'),
+    //         component:TableList,
+    //         meta: { title: '通信录', permission: [ 'QW' ] }
+    //       },
+    //       {
+    //         path: '/list/CustomGroup/152',          
+    //         name: 'CustomGroup_QW',
+            
+    //         component:Cusomgroup,
+    //         // component: () => import('@/views/other/customgroup'),
+    //         meta: { title: '自定义组', permission: [ 'QW' ] }
+    //       },
+          
+    //     ]
+    //   },
+    const iid=ctx.request.query.AdminID
+    const userinfo=await userModel.findUserByAminID(iid)
+    console.log(userinfo);
+    let asyncroutes={}
+    let  DyNamicRoutes= {
+        path: '/',
+        name: 'index',
+        component: 'BasicLayout',
+        meta: { title: '首页' },
+        redirect: '/views',
+        children:[ {
+            path: '/views',
+            redirect: '/views/DepTreelist',
+            name: 'Deptongxunlu',    
+            meta: { title: '大祥区通讯录', icon: 'dashboard' },
+            component: 'PageView',
+            children:[
+              {
+                name: 'DepList',   
+                path: '/views/DepTreelist',
+                component:'TreeList',
+                // component: () => import('@/views/other/TreeList'),
+                meta: { title: '部门列表' }
+              },
+            ]  
+          },             
+         ] 
+    }
+    if(!userinfo.RolesID)
+    {
+        ctx.body={
+            DyNamicRoutes
+        }
+        return 
+    }
+    let roles=userinfo.RolesID.split("|")
+    console.log(roles);
+    let _routes=await PermissionModel.GetDynamicRoutes(roles)
+    let _arr=[]
+    let Permission_Key
+    let _Arrchilds=[]    
+    _Arrchilds= RolesController.groupifyWithArrayAndQC(_routes)
+    _Arrchilds.forEach(v=>{
+        let _routesObj=new Object();
+        let _subroutes=[]
+        if(v.IsParent )
+        {
+            _routesObj={
+                path:'/list/'+v.Permission_key,
+                name:v.Permission_key,
+                // redirect: {name:'Phonelist_'+v.Permission_key},
+                component: 'PageView',
+                meta: { title: v.Permission_name, icon: 'dashboard', permission: [ v.Permission_key ] },                
+            }
+
+            // {
+            //     component: RouteView,
+            //     path: '/list/QWZZB',
+            //     name: 'QWZZB',
+            //     redirect: {name:'Phonelist_QWZZB'},
+            //     meta: { title: '区委组织部', permission: [ 'QWZZB' ] },
+            //     children:[
+            //       {
+                 
+            //         path: '/list/UserPhonelist/91',
+            //         name: 'Phonelist_QWZZB',
+            //         component: () => import('@/views/list/UserPhonelist'),
+            //         meta: { title: '通信录', permission: [ 'QWZZB' ] }
+            //       },
+            //       {
+            //         path: '/list/CustomGroup/91',          
+            //         name: 'CustomGroup_QWZZB',
+            //         component: () => import('@/views/other/customgroup'),
+            //         meta: { title: '自定义组', permission: [ 'QWZZB' ] }
+            //       } 
+            //     ]
+            //   },  
+            if(v.children)
+            {
+                v.children.forEach(sub=>{
+                let _subroutesObj={}
+                if(v.children.length>1)
+                {                 
+              
+                     _subroutesObj={
+                        path:'/list/'+sub['Perinformation.Deps.UploadDir'],
+                        component:'RouteView',
+                        name: sub['Perinformation.Deps.UploadDir'],
+                        redirect: {name:'Phonelist_'+sub['Perinformation.Deps.UploadDir']},
+                        meta: { title: sub['Perinformation.Deps.DepartmentName'], permission: [ sub['Perinformation.Deps.UploadDir'] ] },
+                        children:[
+                            {                 
+                            path: '/list/UserPhonelist/'+sub['Perinformation.Deps.DepartmentId'],
+                            name: 'Phonelist_'+ sub['Perinformation.Deps.UploadDir'],
+                            component:'TableList',
+                            meta: { title: '通信录', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            },
+                            {
+                            path: '/list/CustomGroup/'+sub['Perinformation.Deps.DepartmentId'],          
+                            name: 'CustomGroup_'+ sub['Perinformation.Deps.UploadDir'],
+                            component:'Cusomgroup',
+                            meta: { title: '自定义组', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            } 
+                        ]
+                    }
+                    _subroutes.push(_subroutesObj)     
+                }
+                else
+                {
+                    // cmccSendSms: () => import('@/views/list/modules/sendSMS/cmccSendSms.vue'),
+                    // DepartmentManager: () => import('@/views/list/Department.vue'),
+                    // UploadUserlist: () => import('@/views/list/UploadUserlist.vue'),
+                    // UserList: () => import('@/views/list/UserList.vue'),
+                    // RoleList: () => import('@/views/list/RoleList.vue'),
+                    // PermissionList: () => import('@/views/list/PermissionList.vue'),
+                 
+                    if(sub.Permission_key=='Admin' && sub.DepID==159)
+                    {
+                        _subroutes= [
+                            {      
+                                  path: '/CMCCSend/send',
+                                  name: 'CMCCSend',
+                                  component: 'cmccSendSms',
+                                  meta: { title: '移动发短信' , permission: [ 'Admin' ] }
+                            },
+                            {
+                              path: '/Department/manager',
+                              name: 'Department',
+                              component: 'DepartmentManager',
+                              meta: { title: '部门管理', permission: [ 'Admin' ] }
+                            },
+                            {
+                              path: '/list/uploadUserlist',
+                              name: 'UploadUserlist',
+                              component: 'UploadUserlist',
+                              meta: { title: '联系人批量导入', permission: [ 'Admin' ] }
+                            },
+                            // {
+                            //   path: '/list/old-permission',
+                            //   name: 'old-permission',
+                            //   component: () => import('@/views/list/oldPermissionList'),
+                            //   meta: { title: '原版权限管理', permission: [ 'Admin' ] }
+                            // },
+                            {
+                              path: '/list/user-list',
+                              name: 'UserList',
+                              component: 'UserList',
+                              meta: { title: '用户管理', permission: [ 'Admin' ] }
+                            },
+                            {
+                              path: '/list/role-list',
+                              name: 'RoleList',
+                              component: 'RoleList',
+                              meta: { title: '角色管理', permission: [ 'Admin' ] }
+                            },
+                            {
+                              path: '/list/permission-list',
+                              name: 'PermissionList',
+                              component: 'PermissionList',
+                              meta: { title: '部门类别管理', permission: [ 'Admin' ] }
+                            },
+                          ]
+                          return 
+                    }
+
+                    _subroutes= [
+                        {
+                          path: '/list/UserPhonelist/'+sub['Perinformation.Deps.DepartmentId'],          
+                          name: 'Phonelist_'+ sub['Perinformation.Deps.UploadDir'] ,
+                          // component: () => import('@/views/list/UserPhonelist'),
+                          component:'TableList',
+                          meta: { title: '通信录', permission: [  sub['Perinformation.Deps.UploadDir']  ] }
+                        },
+                        {
+                          path: '/list/CustomGroup/'+sub['Perinformation.Deps.DepartmentId'],          
+                          name: 'CustomGroup_'+sub['Perinformation.Deps.UploadDir'],
+                          
+                          component:'Cusomgroup',
+                          // component: () => import('@/views/other/customgroup'),
+                          meta: { title: '自定义组', permission: [   sub['Perinformation.Deps.UploadDir']] }
+                        },
+                        
+                      ]
+                }
+                   
+          })
+            }
+            _routesObj.children=_subroutes
+            // if(v.children)
+            // {
+            //     v.children.forEach(sub => {
+            //         let _subChildren=new Object();
+            //     _subChildren={
+            //         path: '/list/UserPhonelist/'+sub.DepID,       
+            //         name: 'Phonelist_'+',
+            //         //         name: 'Phonelist_QW',
+            //         //         // component: () => import('@/views/list/UserPhonelist'),
+            //         //         component:TableList,
+            //         //         meta: { title: '通信录', permission: [ 'QW' ] }
+            //     }
+            //     });
+            // }
+            // name: 'QW',   
+            // //     redirect: {name:'Phonelist_QW'},
+            // //     component: PageView,
+            // //     meta: { title: '区委', icon: 'dashboard', permission: [ 'QW','edit' ] },
+            _arr.push(_routesObj)
+            DyNamicRoutes.children.push(_routesObj)
+        }
+    })
+    ctx.body={
+        _arr,
+        DyNamicRoutes,
+        _routes,
+        _Arrchilds,
+     
+        // result,
+        // Asyncroutes2
+    }
+
+//     let _arr=[]
+//     let Permission_Key
+//     let _Arrchilds=[]
+//    for(let x in res)
+//    {
+//      let _obj=new Object();
+
+//      if(res[x].IsView)
+//      {        
+//         let _meta=new Object();
+//        _obj.Permission_key=res[x].Permission_key
+//        _obj.path='/list/'+res[x].Permission_key
+//        _obj.name=res[x].Permission_key         
+//        _obj.Permission_name=res[x].Permission_name
+//        _obj.component='PageView',
+//        _meta.title=res[x].Permission_name
+//        _meta.icon='dashboard'
+//        _meta.permission=res[x].Permission_key
+//        _obj.meta=_meta
+//        Permission_Key=res[x].Permission_key         
+//        if(res[x].Permission_key === Permission_Key && res[x].DepID)
+//        {
+     
+//           let _child=new Object();
+//           _child.component='RouteView'
+//           _child.path='/list/'+res[x]['Perinformation.Deps.UploadDir']
+//           _child.name=res[x]['Perinformation.Deps.UploadDir']
+//           _child.redirect={
+//             name:'Phonelist_'+res[x]['Perinformation.Deps.UploadDir']
+//           }
+//           _child.meta={
+//             title:res[x]['Perinformation.Deps.DepartmentName'],
+//             permission:[res[x]['Perinformation.Deps.UploadDir']]
+//           }
+//           _child.children=[
+//             {
+//                 path:'/list/UserPhonelist/'+res[x].DepID,
+//                 name:'Phonelist_'+res[x]['Perinformation.Deps.UploadDir'],
+//                 component:'TableList',
+//                 meta: { title: '通信录', permission: [ res[x]['Perinformation.Deps.UploadDir']] }
+//             },
+//             {
+//               path:'/list/CustomGroup/'+res[x].DepID,
+//               name:'CustomGroup_'+res[x]['Perinformation.Deps.UploadDir'],
+//               component:'Cusomgroup',
+//               meta: { title: '自定义组', permission: [ res[x]['Perinformation.Deps.UploadDir'],] }
+//           }]
+//           _Arrchilds.push(_child)
+//        }
+//        _obj.children=_Arrchilds
+//       //meta: { title: '区教科、卫生计生系统', icon: 'dashboard', permission: [ 'QJS_WSXT' ] },
+
+//      }
+    
+//     //  for(let y in _obj)
+//     //  {
+//     //   if(PermissionModel.deepCompare(res[x],_obj[y]))
+//     //   {
+//        _arr.push(_obj)
+//     //   }
+//     //  }      
+//    }
+
+
+
+
+
+
+
+
+
+    // for(let x in _routes)
+    // { 
+    //      let obj=new Object();
+    //      let arr=[]
+    //      let childrenObj=new Object();
+    //      if(!_routes[x].IsParent && _routes[x].DepID && _routes[x].IsView)
+    //      {
+    //       obj.component= 'RouteView',
+    //       obj.path= '/list/'+_routes[x].PermissionKey,
+    //       obj.name= _routes[x].PermissionKey,
+    //       obj.redirect= {name:'Phonelist_'+_routes[x].PermissionKey},
+    //       obj.meta= { title: _routes[x].Permission_name, permission: [ 'QWXZB' ] }
+    //       childrenObj.path='/list/UserPhonelist/'+_routes[x].DepID
+    //       childrenObj.name='Phonelist_'+_routes[x].PermissionKey
+    //       childrenObj.component='TableList',
+    //       childrenObj.meta= { title: '通信录', permission: [ _routes[x].PermissionKey ] }
+    //       arr.push(childrenObj)
+    //       obj.children=arr;
+    //      }
+    //      if(obj!={})
+    //      {
+    //          DyNamicRoutes.children.push(obj)
+    //      }
+        
+    //      result.push(obj);
+    //  }
+        //  {
+        //     path: '/list/QJS_WSXT',
+        //     name: 'QJS_WSXT',
+        //     component: PageView,
+        //     meta: { title: '区教科、卫生计生系统', icon: 'dashboard', permission: [ 'QJS_WSXT' ] },
+        //     children: [
+        //       {
+        //         component: RouteView,
+        //         path: '/list/JYJ',
+        //         name: 'JYJ',
+        //         redirect: {name:'Phonelist_JYJ'},
+        //         meta: { title: '教育局', permission: [ 'JYJ' ] },
+        //         children:[
+        //           {
+                  
+        //             path: '/list/UserPhonelist/141',
+        //             name: 'Phonelist_JYJ',
+        //             component: () => import('@/views/list/UserPhonelist'),
+        //             meta: { title: '通信录', permission: [ 'JYJ' ] }
+        //           }
+        //         ]
+        //       },  
+        //     }
+        //  if(_routes[x].DepID)
+        //  {           
+        //      childrenObj.path='/list/UserPhonelist/'+_routes[x].DepID
+        //      childrenObj.name='Phonelist_'+_routes[x].PermissionKey
+        //      childrenObj.component='TableList',
+        //      childrenObj.meta= { title: '通信录', permission: [ _routes[x].PermissionKey ] }
+        //      arr.push(childrenObj)
+            
+        //  }
+        // if(_routes[x].IsParent)
+        // {
+        //   obj.component= 'RouteView',
+        //   obj.path= '/list/'+_routes[x].PermissionKey,
+        //   obj.name= _routes[x].PermissionKey,
+        //   obj.redirect= {name:'Phonelist_'+_routes[x].PermissionKey},
+        //   obj.meta= { title: _routes[x].Permission_name, permission: [ 'QWXZB' ] }
+        //   obj.children=arr;
+        // }
+
+        // path: '/list/UserPhonelist/103',
+        //             name: 'Phonelist_QWXZB',
+        //             component:'TableList',
+        //             meta: { title: '通信录', permission: [ 'QWXZB' ] }
+     
+            // for(let x in Asyncroutes2)
+            // {
+            //     let obj=new Object();
+            //     let s
+            //     if(Asyncroutes2[x].IsView && Asyncroutes2[x].IsParent)
+            //     {
+            //      s= await PermissionModel.findIDByPermissionName(Asyncroutes2[x].PermissionKey)
+            //      if(s)
+            //      {
+            //         obj.key=s.Permission_name 
+            //         //  console.log(s.Permission_name)
+            //      }
+            //     }
+                
+            //     result.push(obj)
+               
+            // }
+    // let _permissionlist=RolesController.deteleObject(Asyncroutes2,'IsView',true); 
+    // for(let x in _permissionlist)
+    // {
+    //     if(Asyncroutes2[x].IsParent && !Asyncroutes2[x].DepID)
+    //     {
+    //           asyncroutes={
+    //             path:'/list/'+Asyncroutes2[x].PermissionKey,
+    //             name: Asyncroutes2[x].PermissionKey,
+    //             component: 'PageView',
+    //             meta: { title: Asyncroutes2[x].PermissionKey, icon: 'dashboard', permission: [ Asyncroutes2[x].PermissionKey ] },              
+    //         }        
+    //     }
+       
+    //         DyNamicRoutes.children.push(asyncroutes);
+    //         console.log('9999999999')
+       
+    // }
+    // Asyncroutes2.forEach(v => {
+    //     if(v.IsParent && !v.DepID)
+    //     {
+            // asyncroutes={
+            //     path:'/list/'+v.PermissionKey,
+            //     name: v.PermissionKey,
+            //     component: 'PageView',
+            //     meta: { title: v.PermissionKey, icon: 'dashboard', permission: [ v.PermissionKey ] },              
+            // }
+            // if(v.DepID)
+            // {
+            //     asyncroutes.children=[
+            //         {
+            //                     component: 'RouteView',
+            //                     path: '/list/QWXZB',
+            //                     name: 'QWXZB',
+            //                     redirect: {name:'Phonelist_QWXZB'},
+            //                     meta: { title: '区委宣传部', permission: [ 'QWXZB' ] },
+            //                     children:[
+            //                       {
+                                 
+            //                         path: '/list/UserPhonelist/103',
+            //                         name: 'Phonelist_QWXZB',
+            //                         component:'TableList',
+            //                         meta: { title: '通信录', permission: [ 'QWXZB' ] }
+            //                       }
+            //                     ]
+            //                   },  
+            //     ]
+            // }
+    //     }
+    // });
+    // let _permissionlist=RolesController.deteleObject(Asyncroutes2,'IsView',true); 
+    // "PermissionKey": "QZFXT",
+    // "IsParent": false,
+    // "IsView": true,
+    // "IsEdit": false,
+    // "DepID": 109
+            // let _arr=[]
+            // Asyncroutes2.forEach(v=>{
+            //     let obj={};
+            //     if(v.IsView)
+            //     {
+                   
+            //         obj.IsView=v.IsView
+            //         obj.PermissionKey=v.PermissionKey
+            //         obj.IsParent=v.IsParent
+            //         obj.IsEdit=v.IsEdit
+            //         obj.DepID=v.DepID
+            //     }
+            //     _arr.push(obj)
+            // })
+
+    //   var result = [];
+    //     var obj = {};
+    //     for(var i =0; i<Asyncroutes2.length; i++){
+    //      if(!obj[Asyncroutes2[i].key]){
+    //        result.push(Asyncroutes2[i]);
+    //        obj[Asyncroutes2[i].key] = true;
+    //      }
+    //     }
+    // for (let i in roles)
+    // {   
+    //     let _PermissionsArr=await PermissionModel.SelectByRoleID(roles[i]) 
+    //     console.log(_PermissionsArr)
+
+    // }
+    // let asyncroutes=   {
+    //     path: '/list/QXCXT',
+    //     name: 'QXCXT',
+    //     // QWXZB	区委宣传部
+    //     // WHLYGDTYJ	文化旅游广电体育局
+    //     // component:TableList,
+    //     // component:Cusomgroup,
+    //     component: 'PageView',
+    //     meta: { title: '宣传系统', icon: 'dashboard', permission: [ 'QXCXT' ] },
+    //     children: [
+    //       {
+    //         component: 'RouteView',
+    //         path: '/list/QWXZB',
+    //         name: 'QWXZB',
+    //         redirect: {name:'Phonelist_QWXZB'},
+    //         meta: { title: '区委宣传部', permission: [ 'QWXZB' ] },
+    //         children:[
+    //           {
+             
+    //             path: '/list/UserPhonelist/103',
+    //             name: 'Phonelist_QWXZB',
+    //             component:'TableList',
+    //             meta: { title: '通信录', permission: [ 'QWXZB' ] }
+    //           }
+    //         ]
+    //       },  
+    //       {
+    //         component: 'RouteView',
+    //         path: '/list/WHLYGDTYJ',
+    //         name: 'WHLYGDTYJ',
+    //         redirect: {name:'Phonelist_WHLYGDTYJ'},
+    //         meta: { title: '文化旅游广电体育局', permission: [ 'WHLYGDTYJ' ] },
+    //         children:[
+    //           {          
+    //             path: '/list/UserPhonelist/104',
+    //             name: 'Phonelist_WHLYGDTYJ',
+    //             component:'TableList',
+    //             meta: { title: '通信录', permission: [ 'WHLYGDTYJ' ] }
+    //           }
+    //         ]
+    //       }, 
+    //     ]
+    //   }
+    
+          
+   
+    // const userinfo=await userModel.findUserByAminID(iid)
+    // const roles= userinfo.dataValues.RolesID.split('|')
+ }
 /**
  * 
  * @param {adminID} ctx 
@@ -42,7 +698,18 @@ static async GetAdminRolesPermissionDepID(ctx)//根据AdminID 获取权限的API
       let PermissList={}
     const PermissionList=[]
     const userinfo=await userModel.findUserByAminID(iid)
-    const roles= userinfo.dataValues.RolesID.split('|')
+    if(!userinfo.RolesID)
+    {
+        userinfo.RolesID={}
+        userinfo.avatar='/avatar2.jpg'
+        ctx.body={
+            code:1,
+            msg:'该用户没有设置权限',
+            result:userinfo
+        }
+        return 
+    }
+    const roles= userinfo.dataValues.RolesID.split('|')   
     const _arr=[]   
     for (let i in roles)
     {   

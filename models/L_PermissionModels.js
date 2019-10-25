@@ -7,7 +7,9 @@ const AdminUser = gov.import('../schema/PE_Admin')
 const Deps = gov.import('../schema/LIM_Department')
 const roles = gov.import('../schema/LIM_Roles')
 const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 Permission.hasMany(Perinformation,{foreignKey:'PermissionKey',sourceKey:'Permission_key',as:'Perinformation'})
+Perinformation.belongsTo(Deps, { foreignKey: 'DepID', targetKey: 'DepartmentId', as: 'Deps' });
 // Camera.hasMany(Car,{
 //   foreignKey:'cameraId',sourceKey:'id', as: 'Cars'
 // })
@@ -15,6 +17,15 @@ Permission.hasMany(Perinformation,{foreignKey:'PermissionKey',sourceKey:'Permiss
 // AdminUser.belongsTo(Area,{foreignKey:'AdminID',sourceKey:'AdminID'})
 Area.hasMany(Permission,{foreignKey:'areakey',sourceKey:'areakey',as:'Permissions'})
 Permission.hasMany(Deps,{foreignKey:'Permission_Key',sourceKey:'Permission_key',as:'DEPS'})
+
+
+// Permission.belongsToMany(Deps, {  as: 'Deps', through: Perinformation,sourceKey:'DepartmentId', foreignKey: 'DepID' })
+// Deps.belongsToMany(Permission, {  as: 'Pers',through: Perinformation ,sourceKey:'ID', foreignKey: 'UserPhoneID'})
+
+// Deps.belongsToMany(UserPhone, {  as: 'Users', through: DEPUsers,sourceKey:'DepartmentId', foreignKey: 'DepID' })
+// UserPhone.belongsToMany(Deps, {  as: 'Deps',through: DEPUsers ,sourceKey:'ID', foreignKey: 'UserPhoneID'})
+
+
 // Deps.hasOne(Perinformation,{foreignKey:'DepID',targetKey:'DepartmentId'})
 // gov.sync().then(function(result){
 //   console.log('区域和角色 一对多，权限和部门一对多')
@@ -43,6 +54,108 @@ class PermissionModel {
  * 
  */
 
+ static async GetDynamicRoutes(role)
+ {
+   return new Promise((resolve)=>{
+    Permission.findAll({   
+      // where:{
+      //   status:1
+      // },
+      attributes:[  
+        'Permission_key',
+        'Permission_name',
+    
+         Sequelize.col('Perinformation.IsView'),   
+         Sequelize.col('Perinformation.IsParent'),   
+         Sequelize.col('Perinformation.IsEdit'),   
+         Sequelize.col('Perinformation.DepID'),   
+         Sequelize.col('Perinformation->Deps.DepartmentId'),   
+                ],    
+    
+          include:[{
+            attributes:[],
+            model:Perinformation,
+            as:'Perinformation',              
+            where:{
+              RoleID: {
+                [Op.in]: role,              
+              },
+              IsView:1,            
+            }, 
+            include:[{
+              attributes:[],
+              model:Deps,
+              as:'Deps',           
+              attributes:[  
+                'UploadDir',
+                'DepartmentName'
+              // Sequelize.col('Deps.UploadDir'),   
+              ],
+              // order:[
+              //   ['Priority', 'DESC'],
+              //   // [Sequelize.col('Perinformation.Deps.Priority'), 'DESC']
+              //   // [Sequelize.col('Permission.Perinformation.Deps.Priority'), 'DESC']
+              //   ],
+            }]
+          }],
+          order:[
+            ['OrderID', 'DESC'],
+            // [Sequelize.col('Perinformation.Deps.DepartmentId'), 'DESC']
+            [Sequelize.col('Perinformation->Deps.Priority'), 'DESC']
+            ],
+           raw:true,
+    }).then(res=>{
+     
+      resolve(res)
+    })
+   })
+    // return new Promise((resolve)=>{
+    //   Permission.findAll({
+    //     attributes:[
+    //       'ID',
+    //       'Permission_name',
+    //       'Permission_key',      
+    //       // 'PermissionKey',
+    //       // 'IsParent',
+    //       // 'IsView',
+    //       // 'IsEdit' ,
+    //       // 'DepID'           
+    //   ],      
+    //   include:[
+    //     {
+    //       model:Perinformation,
+    //        as:'Perinformation',         
+    //         where:{
+    //           RoleID: {
+    //             [Op.in]: role
+    //           }
+    //         },
+    //         // attributes: { include: [[sequelize.fn('COUNT', sequelize.col('hats')), 'no_hats']] }
+    //         attributes:[       
+    //           'id',      
+    //           'PermissionKey',
+    //           // Sequelize.col('Perinformation.IsParent'),
+    //           'IsView',
+    //           'IsEdit',        
+    //           'DepID',
+    //         ],           
+    //         include:[{
+    //           model:Deps,
+    //           as:'Deps',
+    //           attributes:[
+    //             'DepartmentName'
+    //           ]
+    //         }],         
+    //     }
+    //   ],
+    //   // raw:true,
+    //   order:[
+    //     ['OrderID', 'DESC'],],
+    //   }).then(res=>{
+    //     resolve(res)
+    //   })
+    // })
+ }
 
 
 
@@ -86,7 +199,7 @@ static async dbasync()
 
 /**
  * 
- * @param {ctx} param 
+ * @param {ctx} param Key
  */
 static async findIDByPermissionName (key) {
 
@@ -108,10 +221,32 @@ static async findIDByPermissionName (key) {
       reject(error)
     }
   })
- 
-
 }
+/**
+ * 
+ * @param {ctx} param ID
+ */
+static async findIDByPermissionID (ID) {
 
+  return  new Promise((resolve,reject)=>{
+    try {     
+      Permission.findOne({
+        where: {
+            ID:ID
+        }
+      }).then(res=>{
+        resolve(res)
+
+      }).catch(function(reject)
+        {
+          console.log(reject)
+          return reject()
+        })
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
   /**
    * 新添加权限
    * @param userdata
@@ -240,19 +375,10 @@ static async findIDByPermissionName (key) {
  */
 static async SelectByRoleID(data)
 {
-    let roleid=data
-  
+    let roleid=data  
     return new Promise((resolve,reject)=>{
       try { 
-            //Permission
-            // let include=[{
-            //   //,{foreignKey:'Permission_key',sourceKey:'PermissionKey'}
-            //   association:Permission.belongsTo(Perinformation,{foreignKey:'PermissionKey',sourceKey:'Permission_key'}),
-            //       order:[
-            //       ['OrderID', 'DESC'],],
-            //     // required: false              
-            // }]
-            Permission.findAll({             
+         Permission.findAll({             
               attributes:[
                 'ID',
                  Sequelize.col('Perinformation.RoleID'),
@@ -261,11 +387,7 @@ static async SelectByRoleID(data)
                  Sequelize.col('Perinformation.IsView'),
                  Sequelize.col('Perinformation.IsEdit'),
                  Sequelize.col('Perinformation.DepID'),
-            ],
-              // where:{
-              //   IsParent:1,
-              //   RoleID:roleid
-              // },
+            ],         
               include:[{
                 where:{
                   IsParent:1,
@@ -286,9 +408,8 @@ static async SelectByRoleID(data)
                  let res=[];
                  resolve(res);
                  return ;
-               }
-            
-              resolve(res)
+               }            
+            resolve(res)
             }).catch(function(reject)
             {           
               return reject()
@@ -473,21 +594,25 @@ static async SelectByRoleID(data)
          
           
         }
-    /**
+        
+            /**
    * 查询所有角色
    * @param user
    * @returns {Promise.<boolean>}
    */
-  static async findPermiss(ctx) {
+  static async findPermissIsshow(ctx) {
     let Permissionlist="";
-    if(!ctx.status)
+    if(ctx.status==0)
     {
+      console.log('走到这了')
       Permissionlist =  await Permission.findAndCountAll(  
         {    
          // where:{
          //   status:1
          // },
-         order:Permission.addtime
+         order:[
+          ['OrderID', 'DESC'],],
+        //  order:Permission.OrderID
         })
     }
     else
@@ -497,7 +622,42 @@ static async SelectByRoleID(data)
          where:{
            status:ctx.status
          },
-         order:Permission.addtime
+         order:[
+          ['OrderID', 'DESC'],],
+        })
+    }
+  
+    return Permissionlist
+  }
+    /**
+   * 查询所有角色
+   * @param user
+   * @returns {Promise.<boolean>}
+   */
+  static async findPermiss(ctx) {
+    let Permissionlist="";
+    if(ctx.status==0)
+    {
+      console.log('走到这了')
+      Permissionlist =  await Permission.findAndCountAll(  
+        {    
+         // where:{
+         //   status:1
+         // },
+         order:[
+          ['OrderID', 'DESC'],],
+        //  order:Permission.OrderID
+        })
+    }
+    else
+    {
+      Permissionlist =  await Permission.findAndCountAll(  
+        {    
+        //  where:{
+        //    status:ctx.status
+        //  },
+         order:[
+          ['OrderID', 'DESC'],],
         })
     }
   

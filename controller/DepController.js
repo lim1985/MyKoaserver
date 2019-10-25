@@ -71,9 +71,20 @@ class DepModelController {
         console.log(data.lenght)
         
         const res=await DepModel.PostDel(data)
+        console.log(res);
+        if(res==-2)
+        {
+            ctx.body={
+                res,
+                code:-1,
+                message:'该部门下存在联系人，请将联系人移除后再删除该部门！'
+            }
+            return     
+        }
             if(!res)
             {
                 ctx.body={
+                    res,
                     code:-1,
                     message:'删除失败，请重试！'
                 }                
@@ -81,6 +92,7 @@ class DepModelController {
             else
             {
                 ctx.body={
+                    res,
                     code:1,
                     message:'部门删除成功。'
                 }
@@ -158,6 +170,8 @@ static async QueryFindCountAllDEP(ctx)
         obj.Abbreviation=a.Abbreviation
         obj.Priority=a.Priority
         obj.ParentDepartmentId=1
+        obj.PID=a.PID
+        obj.status=a.status
         obj.Number='NULL'
 
         const depflag=await DepModel.select_DepartmentByDEPName(a.DepFullName)

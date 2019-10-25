@@ -8,6 +8,10 @@ const rolesModel = require('../models/L_RolesModels')
 // const bcrypt = require('bcryptjs')
 
 class PermissionController {
+
+
+
+
 static async GetAreaAllPermissbyAdminID(ctx)
 {
     const data=ctx.request.query;
@@ -60,6 +64,7 @@ static async SelectPermissionInformationByRoleID(ctx)
                         if(_permissArr)
                         {
                             obj.label=_permissArr.Permission_name
+                            obj.PID=_permissArr.ID
                         }                        
                     arr.push(obj)
 
@@ -70,9 +75,8 @@ static async SelectPermissionInformationByRoleID(ctx)
         res:arr,
         ore:_PermissionsArr
     }
-  
-
 }
+
   
 static async UpdataPermissionInformation(ctx)
 {    
@@ -181,7 +185,7 @@ static async findAllPermission(ctx)
     const limit=pageSize * 1
      // console.log(typeof(limit))
   
- const Permissionlist=await PermissionModel.findPermiss({ offset:offset,limit: limit })   //{ offset: 0, limit: 10 }, 跳过10 条数据并获取其后的 10 条数据（实例）
+ const Permissionlist=await PermissionModel.findPermiss({offset:offset,limit: limit })   //{ offset: 0, limit: 10 }, 跳过10 条数据并获取其后的 10 条数据（实例）
  // console.log(roleslist)
   
     const result={
@@ -255,14 +259,17 @@ static async findAllPermission(ctx)
      {
       //console.log(ctx.request.query)
        const data=ctx.request.query
-   
-       const Isexits=await PermissionModel.findIDByPermissionName(data.Permissionskey)
-     
       
-        if(!Isexits || Isexits.status!=data.status)
-        {       
-            console.log(Isexits)
-            console.log(Isexits.status)
+      
+        if(!data)
+        {
+          ctx.body={
+              code:-1,
+              msg:'参数传递错误'
+          }
+        }
+        else//data 参数为真
+        {
             let _data={
                 ID:data.ID,
                 Permission_key:data.Permissionskey,
@@ -271,30 +278,57 @@ static async findAllPermission(ctx)
                 OrderID:data.OrderID,
                 areakey:data.Areakey,
                 status:data.status
-            }
-            const result= await PermissionModel.updatePermission(_data)
-            if(result)
+            } 
+            const Isexits=await PermissionModel.findIDByPermissionName(data.Permissionskey)
+            if(!Isexits)
             {
-                ctx.body={
-                    code:1,
-                    message:'修改成功！'
+                const result= await PermissionModel.updatePermission(_data)
+                console.log('1');
+                if(result)
+                {
+                    ctx.body={
+                        code:1,
+                        message:'修改成功!'
                     }
+                }
+                else
+                {
+                    ctx.body={
+                        code:-1,
+                        message:'修改失败！'
+                    }
+                } 
             }
-            else
+            else if(Isexits.Permission_key==data.Permissionskey && Isexits.ID==data.ID)
+            {            
+                const result= await PermissionModel.updatePermission(_data)
+                console.log('2');
+                if(result)
+                {
+                    ctx.body={
+                        code:1,
+                        message:'修改成功!'
+                    }
+                }
+                else
+                {
+                    ctx.body={
+                        code:-1,
+                        message:'修改失败！'
+                    }
+                }   
+            }             
+            else if(Isexits && Isexits.ID!=data.ID) 
             {
+                console.log('3');
                 ctx.body={
                     code:-1,
-                    message:'修改失败！'
-                    }
-            }         
-        }
-        else
-        {
-            ctx.body={
-                code:-1,
-                msg:'类别标识重复，写入失败'
+                    message:'类别标识重复，写入失败,请修改唯一标识符'
+                }
             }
-        }    
+     
+        }
+        
      }
     /**
      * 新增权限

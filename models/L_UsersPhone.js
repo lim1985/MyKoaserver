@@ -321,12 +321,10 @@ static async GetUserPhoneByDepID(s)
    * @returns {Promise.<*>}
    */
   static async findUserByusernamelike (s) {
-    const userInfo = await UsersPhone.findAndCountAll({
-    
+    const userInfo = await UsersPhone.findAndCountAll({    
       as:'Users',
       raw: true,
-      // limit: s.limit, // 每页多少条
-      // offset: s.offset ,// 跳过当前多少条
+   
       attributes:[
                       // 'Abbreviation',
                       // 'DepartmentId',
@@ -335,6 +333,7 @@ static async GetUserPhoneByDepID(s)
                       // 'UploadDir',
                       'Email',
                       'QQ',
+                      'Sex',
                       'status',
                       'UserName',
                       'UJOB',
@@ -344,10 +343,9 @@ static async GetUserPhoneByDepID(s)
                       'cellphone',
                        Sequelize.col('ResferecDep.Abbreviation'),//内容
                       // Sequelize.col('ResferecDep.DepartmentId'),//内容
-                      // Sequelize.col('ResferecDep.Permission_Key'),//内容
+                       Sequelize.col('ResferecDep.Permission_Key'),//内容
                       // Sequelize.col('ResferecDep.Priority'),//内容
-                      // Sequelize.col('ResferecDep.UploadDir'),//内容
-                                      
+                      // Sequelize.col('ResferecDep.UploadDir'),//内容                                      
                     ],
       where:         
            {
@@ -356,6 +354,62 @@ static async GetUserPhoneByDepID(s)
                 // 模糊查询
                 [Op.like]:'%' +s.username  + '%'
               }
+            },
+            include:[
+              {
+                model:Deps,
+                as:'ResferecDep',
+                  through: {
+                  where:{
+                    status:-1
+                  }          
+                }, 
+              attributes:[], 
+              }
+            ]
+    })
+    return userInfo
+  }
+   /**
+   * 查询用户信息
+   * @param name  模糊姓名
+   * @returns {Promise.<*>}
+   */
+  static async findUserByusernameAndDepIDlike (s) {
+    const userInfo = await UsersPhone.findAndCountAll({    
+      as:'Users',
+      raw: true,   
+      attributes:[
+                      // 'Abbreviation',
+                      // 'DepartmentId',
+                      // 'Permission_Key',
+                      // 'Priority',
+                      // 'UploadDir',
+                      'Email',
+                      'QQ',
+                      'Sex',
+                      'status',
+                      'UserName',
+                      'UJOB',
+                      'Tel',
+                      'OrderID',
+                      'ID',
+                      'cellphone',
+                       Sequelize.col('ResferecDep.Abbreviation'),//内容
+                      // Sequelize.col('ResferecDep.DepartmentId'),//内容
+                       Sequelize.col('ResferecDep.Permission_Key'),//内容
+                      // Sequelize.col('ResferecDep.Priority'),//内容
+                      // Sequelize.col('ResferecDep.UploadDir'),//内容                                      
+                    ],
+      where:         
+           {
+              // UserName : s.username 
+              UserName: {
+                // 模糊查询
+                [Op.like]:'%' +s.username  + '%',
+           
+              },
+              Department_ID:s.DepID
             },
             include:[
               {
@@ -664,7 +718,8 @@ static async GetUserPhoneByDepID(s)
               console.log(data)
               ResferenceUserPhoneAndDEP.update({DepID:data.Department_ID},{//再修改关联表
                 where:{
-                  UserPhoneID:data.ID
+                  UserPhoneID:data.ID,
+                  status:-1
                 }
               })
             }

@@ -15,8 +15,16 @@ const gov = new Sequelize(config.database,config.username,config.password, {
       min: 0,
       idle: 30000
     },
+     dialectOptions: {
+    useUTC: false //for reading from database
+  },
     define:{
       timestamps:false
+    },
+    timezone: '+08:00',
+    dialectOptions: {
+      dateStrings: true,
+      typeCast: true
     }
   });
   gov

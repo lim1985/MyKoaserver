@@ -9,6 +9,11 @@ const ReferenceUserController = require('../controller/ReferenceUserController')
 const CustomGroupController = require('../controller/CustomGroupController')
 const SmsRouter = require('../controller/sendsmsAction')
 const WxRouter = require('../controller/WxContorller')
+const ErrorInformation = require('../controller/ErrOrInformationController')
+const PersonInformation = require('../controller/PersonInformationController')
+
+
+
 
 
 
@@ -20,6 +25,10 @@ const router = new Router({
 })
 
 router
+
+//登记人员信息管理接口
+
+  .get('/selectByJdId', PersonInformation.selectByJd_Id) 
 //微信相关路由
   .get('/GetCode', WxRouter.GettokenCode) // 注册
 //短信验证登陆方法
@@ -69,7 +78,9 @@ router
   .get('/DepartmentQueryALL',DepartmentController.QueryFindCountAllDEP)
   .get('/selectAlldepartmentBykey',DepartmentController.selectAll_DepartmentByPermission_Key)
   .get('/SelectDepslistsbyLike',DepartmentController.SelectDepslistsbyLike)
-  
+  .post('/selectDepSmsCount',DepartmentController.selectDepSmsCount)
+  .get('/updateDepSmsCount',DepartmentController.updateSmsCount)
+  .post('/selectSmsAccounts',DepartmentController.selectSmsAccounts)
  
   //phoneUser通讯录接口
   .post('/asyncValidateTel',UserPhonelistController.ValidateTel)
@@ -93,8 +104,9 @@ router
   .get('/GetuserInformationbyTelNum',UserPhonelistController.GetuserInformationbyTelNum)
   .get('/GetuserInformationbyname',UserPhonelistController.GetuserInformationbyUsername)
   .get('/GetUserInformationByUserNameLIke',UserPhonelistController.GetUserInformationByUserNameLIke)
+  .get('/ChangeToQita',UserPhonelistController.ChangeDepToQita)
 
-
+  
   
 //获取路由表
   .get('/getRouteByAdmin',UserController.GetRouteByAdminID)
@@ -114,6 +126,15 @@ router
   .get('/FindAllUserByGroupID',CustomGroupController.FindAllUsersByGroupID)
   .get('/DeleteGroupUser',CustomGroupController.DeleteUserByUID)
   .get('/DeleteGroup',CustomGroupController.DeleteGroupByGroupID)
+  .post('/SortCustomGroupUserPhoneList',CustomGroupController.sortCustomGroupUsers)
+//errorinformation
+  .get('/submitErrorInfo',ErrorInformation.submitErrorInfo)
+  .get('/selectErrorInfo',ErrorInformation.SelectErrorInfo)
+  .get('/UpdateErrorInfo',ErrorInformation.UpdateErrorInfo)
+
+
+
+
 
   
 //   .get('/myuserInfo', UserController.myUserInfoGet) // 获取用户信息

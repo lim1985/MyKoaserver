@@ -1,13 +1,55 @@
 const db = require('../config/db')
 const gov = db.gov
 const DEP = gov.import('../schema/LIM_Department.js')
+const DepSMSCount = gov.import('../schema/LIM_SMSDepCount.js')
 const UsersPhone = gov.import('../schema/LIM_UsersPhone.js')
 const Perinformation = gov.import('../schema/LIM_PermissionInformation.js')
+const DepSmsAccouts = gov.import('../schema/LIM_CmccDepAccounts.js')
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
+// DEP.hasOne(DepSMSCount,{
+
+// })
+
+// SysUser.hasOne(MonitorSetting,{foreignKey: 'uId',sourceKey: 'id'});
+// MonitorSetting.belongsTo(SysUser, {foreignKey: 'uId',targetKey: 'id'});
+DEP.belongsTo(DepSMSCount,{foreignKey: 'DepartmentId',targetKey: 'DepID',as :'depsmscount'},);
+// DEP.hasOne(DepSMSCount, { foreignKey: 'DepID' })
+// DepSMSCount.belongsTo(DEP, {foreignKey: 'DepID',targetKey: 'DepartmentId'});
 DEP.belongsTo(Perinformation, { foreignKey: 'DepartmentId', targetKey: 'DepID', as: 'DepInformation' });
+DEP.belongsTo(DepSmsAccouts, { foreignKey: 'DepartmentId', targetKey: 'DepID', as: 'DepSmsAccouts' });
+
+
+
 class DepartmentModel {
 
+
+  /**
+   * 
+   * @param {*} data 
+   */
+  static async UpdateDepSmsCount(data)
+  {
+    return new Promise((resolve,reject)=>{
+      try {
+        // DEP.update(data,{where:{DepartmentId:data.DepartmentId}}).then(res=>
+        //   {
+        //     console.log(res);
+        //   return res
+        //   })
+        DepSMSCount.update(data,{
+          where:{
+            DepID:data.DepID
+          }
+        }).then(r=>{
+          console.log(r);
+          resolve(r)
+        })     
+      } catch (error) {
+        reject (error)
+      }
+    })
+  }
 
  /**
   * like 模糊查找部门 
@@ -88,6 +130,11 @@ class DepartmentModel {
           }).then(IsDelDep=>{
             if(IsDelDep)
             {
+            DepSMSCount.destroy({
+                where:{
+                  DepID:data.DepartmentId
+                }
+              })
               Perinformation.findAll({
                       where:{
                         DepID:data.DepartmentId
@@ -107,8 +154,8 @@ class DepartmentModel {
                             })
                       .then(IsDelInfo=>{
                           if(IsDelInfo>=1)
-                          {
-                            resolve(true)
+                          { 
+                                resolve(true)
                           }
                       })
                   }
@@ -189,11 +236,34 @@ class DepartmentModel {
 
             if(DepisUpdated)
             {
+              // DepSMSCount.update({SMSCount:data.smsCount},
+              //   {
+              //     where:{
+              //       DepID:data.DepartmentId
+              //     }
+              //   })
+              DepSMSCount.findOrCreate({
+                where: {
+                  DepID:data.DepartmentId
+                },
+                defaults: {SMSCount:data.smsCount}
+            }).then(([DepSMSCount,created])=>{
+              console.log(created);
+              if(created==false)
+              {
+                 DepSMSCount.update({SMSCount:data.smsCount},
+                {
+                  where:{
+                    DepID:data.DepartmentId
+                  }
+                })
+              }
+            });
               Perinformation.update({PermissionKey:data.Permission_Key},{
                 where:{
                   DepID:data.DepartmentId
                 }
-              })
+              })              
               .then(isUpdate=>{
                 if(isUpdate)
                 {
@@ -222,11 +292,13 @@ class DepartmentModel {
   static async QueryFindCountAllDEP(ctx)
   {   
     let count=` SELECT count([LIM_Department].[DepartmentId]) AS [count] FROM [LIM_Department] AS [LIM_Department]`
-    let sql=`SELECT LIM_Permission.ID, LIM_Permission.RoleID, LIM_Permission.Permission_key, LIM_Permission.Permission_name, 
+    let sql=`SELECT   LIM_Permission.ID, LIM_Permission.RoleID, LIM_Permission.Permission_key, LIM_Permission.Permission_name, 
     LIM_Permission.description, LIM_Permission.optioncode, LIM_Permission.OrderID, LIM_Department.DepartmentId, 
     LIM_Department.DepartmentName, LIM_Department.Abbreviation, LIM_Department.UploadDir, 
-    LIM_Department.ParentDepartmentId, LIM_Department.Priority, LIM_Department.PID, LIM_Department.status
+    LIM_Department.ParentDepartmentId, LIM_Department.Priority, LIM_Department.PID, LIM_Department.status, 
+    LIM_SMSDepCount.SMSCount
 FROM      LIM_Department LEFT OUTER JOIN
+    LIM_SMSDepCount ON LIM_Department.DepartmentId = LIM_SMSDepCount.DepID LEFT OUTER JOIN
     LIM_Permission ON LIM_Department.Permission_Key = LIM_Permission.Permission_key
 ORDER BY LIM_Department.DepartmentId DESC`
     return new Promise(async(resolve,reject)=>{
@@ -313,6 +385,49 @@ static async select_DepartmentByDEPName(s)
           }
         })
   }
+
+
+  /**
+   * 
+   * @param {*} s 
+   * @param {*} DepID 
+   */
+  static async selectDepAccounts(DepID)
+  {
+    return new Promise((resolve,reject)=>{
+      try {
+        DEP.findAndCountAll({
+            attributes:[
+              'DepartmentId',
+              Sequelize.col('DepSmsAccouts.ApID'),
+              Sequelize.col('DepSmsAccouts.Password'),
+              Sequelize.col('DepSmsAccouts.Sign'),   
+              Sequelize.col('DepSmsAccouts.AddSerial'),  
+              Sequelize.col('DepSmsAccouts.EcName'),
+              Sequelize.col('DepSmsAccouts.TemplateId'),
+              Sequelize.col('DepSmsAccouts.Params'),                 
+            ],
+           where: {
+            DepartmentId:DepID,         
+          },  
+          include:[
+            {
+              model:DepSmsAccouts,
+              as:'DepSmsAccouts',
+              attributes:[],
+              required: false 
+            },            
+          ],
+          raw:true  
+         }).then(res=>{
+           resolve(res)
+         })
+      } catch (error) {
+        reject(error)
+
+      }     
+    })
+  }
   /**
  * 
  * @param {ctx} s 
@@ -328,7 +443,8 @@ static async selectAll_DepartmentByPermission_Key(s,roleid)
         attributes: [
          Sequelize.col('DepInformation.IsParent'),
          Sequelize.col('DepInformation.IsView'),
-         Sequelize.col('DepInformation.IsEdit'),        
+         Sequelize.col('DepInformation.IsEdit'),   
+         Sequelize.col('DepInformation.IsSendSms'),           
         'Abbreviation' ,
         // ['DepartmentId','DepID'],
         // ['Permission_Key','Permissionkey'],
@@ -405,19 +521,120 @@ static async findOne_DepartmentByDepartmentID(s)
    * @returns {Promise.<boolean>}
    */
   static async Add_Department (s) {
-    
-    await DEP.create({
-      'DepartmentName': s.DepartmentName,
-      'Permission_Key': s.Permission_Key,
-      'UploadDir': s.UploadDir,
-      'Abbreviation': s.Abbreviation,
-      'ParentDepartmentId': s.ParentDepartmentId,
-      'Priority': s.Priority,
-      'Number': s.Number,   
-      'PID': s.PID,
-      'status': 1,     
+    return new Promise((resolve,reject)=>{
+      try {
+        DEP.create({
+          'DepartmentName': s.DepartmentName,
+          'Permission_Key': s.Permission_Key,
+          'UploadDir': s.UploadDir,
+          'Abbreviation': s.Abbreviation,
+          'ParentDepartmentId': s.ParentDepartmentId,
+          'Priority': s.Priority,
+          'Number': s.Number,   
+          'PID': s.PID,
+          'status': 1,     
+        }).then(res=>{
+          console.log(res)
+          resolve(res);
+        })
+      } catch (reject) {
+        return reject();
+      }   
     })
-    return true
+  }
+
+  static async Add_SmsDep(s)
+  {
+    return new Promise ((resolve,reject)=>{
+      try {
+        DepSMSCount.create({
+          'DepID':s.DepID,
+          'SMSCount':s.SMSCount
+        }).then(res=>{
+          resolve(res)
+        })
+      } catch (reject) {
+        console.log(reject);
+      }
+    })
+  }
+  static async Select_SmsCountByDepID(DepID)
+  {
+    return new Promise ((resolve,reject)=>{
+      try {
+
+        DEP.findAll({
+             attributes: [
+            //  'DepartmentName'
+          'DepartmentName',
+          'DepartmentId',
+           Sequelize.col('depsmscount.SMSCount'),
+              // Sequelize.col('DepInformation.IsParent'),
+              // Sequelize.col('DepInformation.IsView'),
+              // Sequelize.col('DepInformation.IsEdit'),
+              // Sequelize.col('DepInformation.DepID'),
+            ]  ,
+          include:[
+            {
+              model:DepSMSCount,
+              as:'depsmscount',
+              where:{
+                  DepID:{
+                      [Op.in]:[DepID]
+                  }    
+              },
+              attributes: [            
+                ],              
+            }],
+            raw:true  
+        //   required: false        
+        // }],  
+        // raw:true  
+        }).then(res=>{
+          resolve(res);
+        })
+        // let DepSMSCount=await DEP.findAll({
+        //   where:{
+        //     DepartmentId:DepID
+        //   }
+        // })
+        // DepSMSCount.
+        // DEP.findAll({
+        //   attributes: [
+        //     //  'DepartmentName'
+          
+        //      Sequelize.col('depsmscount.SMSCount'),
+        //       // Sequelize.col('DepInformation.IsParent'),
+        //       // Sequelize.col('DepInformation.IsView'),
+        //       // Sequelize.col('DepInformation.IsEdit'),
+        //       // Sequelize.col('DepInformation.DepID'),
+        //     ]  ,
+        //   include:[{
+        //     model:DepSMSCount,
+        //     as:'depsmscount',
+        //     attributes: [
+        //     //  'DepartmentName'
+           
+        //       // Sequelize.col('DepInformation.IsParent'),
+        //       // Sequelize.col('DepInformation.IsView'),
+        //       // Sequelize.col('DepInformation.IsEdit'),
+        //       // Sequelize.col('DepInformation.DepID'),
+        //     ]  ,
+        //     required: false        
+        //   }],
+        //  where:{
+        //    DepID:{
+        //     [Op.in]:[DepID]
+        //    }      
+        //  },
+       
+        // }).then(res=>{
+        //   resolve(res)
+        // })
+      } catch (reject) {
+        console.log(reject);
+      }
+    })
   }
 }
 

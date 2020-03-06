@@ -50,6 +50,7 @@ static async SelectPermissionInformationByRoleID(ctx)
                      obj.DepID=_PermissionsArr[x].DepID,
                      obj.IsEdit=_PermissionsArr[x].IsEdit,
                      obj.IsParent=_PermissionsArr[x].IsParent,
+                     obj.IsSendSms=_PermissionsArr[x].IsSendSms
                      obj.IsView=_PermissionsArr[x].IsView,
                      obj.RoleID=_PermissionsArr[x].RoleID,
                      obj.value=_PermissionsArr[x].PermissionKey
@@ -59,12 +60,14 @@ static async SelectPermissionInformationByRoleID(ctx)
                         let _depArr=await DepModel.selectAll_DepartmentByPermission_Key(_PermissionsArr[x].PermissionKey,_PermissionsArr[x].RoleID)    
                         console.log(_depArr.rows)
                         obj.actionOptions=_depArr.rows
-                    }                   
+                    }
+                                    
                         let _permissArr=await  PermissionModel.findIDByPermissionName(_PermissionsArr[x].PermissionKey)
                         if(_permissArr)
                         {
                             obj.label=_permissArr.Permission_name
                             obj.PID=_permissArr.ID
+                           
                         }                        
                     arr.push(obj)
 

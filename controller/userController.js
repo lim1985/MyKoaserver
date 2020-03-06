@@ -74,6 +74,7 @@ class UserController {
             const Admin=await userModel.findAdminByPhone(data);
               if(Admin.Isadmin)
               {
+              
                  ctx.session.vv=""//可以登录了清除session
                 const userToken = {
                   name: Admin.res.AdminName,
@@ -464,6 +465,7 @@ class UserController {
     console.log(User.dataValues)
 
     const userInfo={
+      SendsmsList:[],
       name:User.dataValues.AdminName,
       id:User.dataValues.AdminID,      
       rolesid:User.dataValues.RolesID,

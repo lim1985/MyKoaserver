@@ -16,6 +16,10 @@ module.exports = function(sequelize, DataTypes) {
         UserPhoneID: {
         type: DataTypes.INTEGER,
         allowNull: false
+      }    ,
+      OrderID: {
+        type: DataTypes.INTEGER,
+        allowNull: true
       }    
     }, {
     timestamps: false,

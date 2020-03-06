@@ -21,7 +21,59 @@ UsersPhone.belongsToMany(Deps, {through: ResferenceUserPhoneAndDEP, as:'Resferec
 //   })
 
 class UsersPhoneModel {
+ static async ChageUsersToQita(data){
 
+      return new Promise(async(resolve,resject)=>{
+         if(data)
+         {
+          //  let isExict=UsersPhone.findAll(data).then(res=>{
+          //    return res
+          //  })
+            let isExict=await UsersPhone.findAndCountAll({
+               where:{
+                 ID:data.ID,
+                 Department_ID:163,
+                 Permission_Key:'QT'
+               }
+            })
+            console.log(isExict)
+            if(isExict.count==0)
+            {
+               UsersPhone.update({Department_ID:163,Permission_Key:'QT',ID:data.ID},{
+               where:{
+               ID:data.ID
+             }
+           }).then(res=>{
+             if(res)
+             {
+              ResferenceUserPhoneAndDEP.update({DepID:163}, {
+                where: {
+                  UserPhoneID: data.ID,
+                  status:-1
+                }
+              }).then(isOK=>{
+                resolve(isOK)
+              })
+             }
+           })
+         }
+         else
+         {
+           resolve(
+             {
+               code:-1,
+               msg:'不可删除该栏目中的联系人'
+             }
+           )
+         }
+          //  resolve(isExict)      
+         }
+         else
+         {
+           resject()
+         }
+      })
+ }
 
 
   static async SortUserByDepID(data)//根据用户部门ID 进行排序
@@ -324,7 +376,7 @@ static async GetUserPhoneByDepID(s)
     const userInfo = await UsersPhone.findAndCountAll({    
       as:'Users',
       raw: true,
-   
+  
       attributes:[
                       // 'Abbreviation',
                       // 'DepartmentId',
@@ -366,7 +418,9 @@ static async GetUserPhoneByDepID(s)
                 }, 
               attributes:[], 
               }
-            ]
+            ],
+          
+          
     })
     return userInfo
   }

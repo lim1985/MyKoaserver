@@ -95,83 +95,7 @@ static groupifyWithArrayAndQC(arr) {
 }
  static async GetDynamicRoutesByAdminID(ctx)
  {
-
-    // const adminList={
-    //     path: '/DepartmentManager',
-    //     name: 'DepartmentManager',
-    //     redirect: '/Department/manager',
-    //     component: PageView,
-    //     meta: { title: '管理', icon: 'dashboard', permission: [ 'Admin' ] },
-    //     children: [
-    //       {      
-    //             path: '/CMCCSend/send',
-    //             name: 'CMCCSend',
-    //             component: () => import('@/views/list/modules/sendSMS/cmccSendSms'),
-    //             meta: { title: '移动发短信' , permission: [ 'Admin' ] }
-    //       },
-    //       {
-    //         path: '/Department/manager',
-    //         name: 'Department',
-    //         component: () => import('@/views/list/Department'),
-    //         meta: { title: '部门管理', permission: [ 'Admin' ] }
-    //       },
-    //       {
-    //         path: '/list/uploadUserlist',
-    //         name: 'UploadUserlist',
-    //         component: () => import('@/views/list/UploadUserlist'),
-    //         meta: { title: '联系人批量导入', permission: [ 'Admin' ] }
-    //       },
-    //       // {
-    //       //   path: '/list/old-permission',
-    //       //   name: 'old-permission',
-    //       //   component: () => import('@/views/list/oldPermissionList'),
-    //       //   meta: { title: '原版权限管理', permission: [ 'Admin' ] }
-    //       // },
-    //       {
-    //         path: '/list/user-list',
-    //         name: 'UserList',
-    //         component: () => import('@/views/list/UserList'),
-    //         meta: { title: '用户管理', permission: [ 'Admin' ] }
-    //       },
-    //       {
-    //         path: '/list/role-list',
-    //         name: 'RoleList',
-    //         component: () => import('@/views/list/RoleList'),
-    //         meta: { title: '角色管理', permission: [ 'Admin' ] }
-    //       },
-    //       {
-    //         path: '/list/permission-list',
-    //         name: 'PermissionList',
-    //         component: () => import('@/views/list/PermissionList'),
-    //         meta: { title: '部门类别管理', permission: [ 'Admin' ] }
-    //       },
-    //     ]
-    //   }
-    //   {
-    //     path: '/list/QW',
-    //     name: 'QW',   
-    //     redirect: {name:'Phonelist_QW'},
-    //     component: PageView,
-    //     meta: { title: '区委', icon: 'dashboard', permission: [ 'QW','edit' ] },
-    //     children: [
-    //       {
-    //         path: '/list/UserPhonelist/152',          
-    //         name: 'Phonelist_QW',
-    //         // component: () => import('@/views/list/UserPhonelist'),
-    //         component:TableList,
-    //         meta: { title: '通信录', permission: [ 'QW' ] }
-    //       },
-    //       {
-    //         path: '/list/CustomGroup/152',          
-    //         name: 'CustomGroup_QW',
-            
-    //         component:Cusomgroup,
-    //         // component: () => import('@/views/other/customgroup'),
-    //         meta: { title: '自定义组', permission: [ 'QW' ] }
-    //       },
-          
-    //     ]
-    //   },
+   
     const iid=ctx.request.query.AdminID
     const userinfo=await userModel.findUserByAminID(iid)
     console.log(userinfo);
@@ -274,11 +198,37 @@ static groupifyWithArrayAndQC(arr) {
                             name: 'CustomGroup_'+ sub['Perinformation.Deps.UploadDir'],
                             component:'Cusomgroup',
                             meta: { title: '自定义组', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
-                            } 
+                            }
+                            //  ,
+                            // {
+                            //     path: '/list/yqdata/'+sub['Perinformation.Deps.DepartmentId'],          
+                            //     name: 'yqdata_'+ sub['Perinformation.Deps.UploadDir'],
+                            //     component:'yqdata',
+                            //     meta: { title: '人员数据', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            // }
                         ]
                     }
+                         if(sub.Permission_key=='QXZ_XT')//乡镇系统的栏目节点
+                        {
+                            let yqdata=
+                            {
+                                path: '/list/yqdata/'+sub['Perinformation.Deps.DepartmentId'],          
+                                name: 'yqdata_'+ sub['Perinformation.Deps.UploadDir'],
+                                component:'yqdata',
+                                meta: { title: '人员数据审核', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            }
+                            _subroutesObj.children.push(yqdata)
+                        }
                     _subroutes.push(_subroutesObj)     
                 }
+                
+                            // {
+                            //     path: '/list/yqdata/'+sub['Perinformation.Deps.DepartmentId'],          
+                            //     name: 'yqdata_'+ sub['Perinformation.Deps.UploadDir'],
+                            //     component:'yqdata',
+                            //     meta: { title: '人员数据', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            // } 
+               
                 else
                 {
                     // cmccSendSms: () => import('@/views/list/modules/sendSMS/cmccSendSms.vue'),
@@ -291,6 +241,12 @@ static groupifyWithArrayAndQC(arr) {
                     if(sub.Permission_key=='Admin' && sub.DepID==159)
                     {
                         _subroutes= [
+                            {      
+                                path: '/Search/GlobalSearch',
+                                name: 'GlobalSearch',
+                                component: 'GlobalSearch',
+                                meta: { title: '全局搜索' , permission: [ 'Admin' ] }
+                          },
                             {      
                                   path: '/CMCCSend/send',
                                   name: 'CMCCSend',
@@ -319,7 +275,7 @@ static groupifyWithArrayAndQC(arr) {
                               path: '/list/user-list',
                               name: 'UserList',
                               component: 'UserList',
-                              meta: { title: '用户管理', permission: [ 'Admin' ] }
+                              meta: { title: '管理员管理', permission: [ 'Admin' ] }
                             },
                             {
                               path: '/list/role-list',
@@ -333,6 +289,12 @@ static groupifyWithArrayAndQC(arr) {
                               component: 'PermissionList',
                               meta: { title: '部门类别管理', permission: [ 'Admin' ] }
                             },
+                            {
+                              path: '/list/jiucuo',
+                              name: 'jiucuo',
+                              component: 'jiucuoList',
+                              meta: { title: '纠错信息管理', permission: [ 'Admin' ] }
+                             },
                           ]
                           return 
                     }
@@ -352,9 +314,19 @@ static groupifyWithArrayAndQC(arr) {
                           component:'Cusomgroup',
                           // component: () => import('@/views/other/customgroup'),
                           meta: { title: '自定义组', permission: [   sub['Perinformation.Deps.UploadDir']] }
-                        },
-                        
+                        },                        
                       ]
+                        if(sub.Permission_key=='QXZ_XT')//乡镇系统的栏目节点
+                        {
+                            let yqdata=
+                            {
+                                path: '/list/yqdata/'+sub['Perinformation.Deps.DepartmentId'],          
+                                name: 'yqdata_'+ sub['Perinformation.Deps.UploadDir'],
+                                component:'yqdata',
+                                meta: { title: '人员数据', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            }
+                            _subroutes.push(yqdata)
+                        }
                 }
                    
           })
@@ -695,17 +667,24 @@ static async GetAdminRolesPermissionDepID(ctx)//根据AdminID 获取权限的API
 {
     const iid=ctx.request.query.AdminID
     const permissions=[]
-      let PermissList={}
+    
     const PermissionList=[]
-    const userinfo=await userModel.findUserByAminID(iid)
+    const SendsmsList=[]
+    let userinfo=await userModel.findUserByAminID(iid)
     if(!userinfo.RolesID)
     {
-        userinfo.RolesID={}
-        userinfo.avatar='/avatar2.jpg'
+        userinfo.RolesID={
+            avatar:'/avatar2.jpg',
+            SendsmsList:SendsmsList
+           
+        }
+     
+     
         ctx.body={
             code:1,
             msg:'该用户没有设置权限',
-            result:userinfo
+            result:userinfo,
+           
         }
         return 
     }
@@ -750,12 +729,18 @@ static async GetAdminRolesPermissionDepID(ctx)//根据AdminID 获取权限的API
             if(v.IsView && v.IsParent)
             {
                 PermissionList.push(v.value)  
+                
                 v.actionOptions.forEach(s=>{   
                     if(s.IsView)
                     {
                         PermissionList.push(s.UploadDir)
-                    }      
-                })                            
+                    }    
+                    if(s.IsSendSms)  
+                    {                   
+                        SendsmsList.push(s.DepartmentId)                      
+                    }
+                })      
+                            
             }     
         });
         var r = PermissionList.filter(function(e,index,self){//数组去重
@@ -832,13 +817,14 @@ static async GetAdminRolesPermissionDepID(ctx)//根据AdminID 获取权限的API
             roleId: userinfo.dataValues.UserName,
             role:roleslist,
             createTime: 1497160610259,
-            creatorId: "admin"
+            creatorId: "admin",
+            SendsmsList:Array.from(new Set(SendsmsList)) 
   
         }
  
 
-    ctx.body={
-        message:'',
+    ctx.body={      
+        message:'',       
         result:user,
         status: 200,
         timestamp: 1534844188679

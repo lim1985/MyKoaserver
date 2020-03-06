@@ -63,8 +63,7 @@ class PermissionModel {
       // },
       attributes:[  
         'Permission_key',
-        'Permission_name',
-    
+        'Permission_name',    
          Sequelize.col('Perinformation.IsView'),   
          Sequelize.col('Perinformation.IsParent'),   
          Sequelize.col('Perinformation.IsEdit'),   
@@ -384,6 +383,7 @@ static async SelectByRoleID(data)
                  Sequelize.col('Perinformation.RoleID'),
                  Sequelize.col('Perinformation.PermissionKey'),
                  Sequelize.col('Perinformation.IsParent'),
+               
                  Sequelize.col('Perinformation.IsView'),
                  Sequelize.col('Perinformation.IsEdit'),
                  Sequelize.col('Perinformation.DepID'),
@@ -458,7 +458,9 @@ static async SelectByRoleID(data)
                 var childrenValue = {
                   RoleID:ID,
                   PermissionKey:A.Permission_Key,
-                  IsParent: false,                
+                  IsParent: false,                              
+                  IsParent: false,                              
+                  IsSendSms:A.IsSendSms,
                   IsView:A.IsView,
                   IsEdit:A.IsEdit,
                   DepID:A.DepartmentId

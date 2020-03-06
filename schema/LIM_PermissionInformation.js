@@ -27,6 +27,10 @@ module.exports = function(sequelize, DataTypes) {
           type: DataTypes.INTEGER,
           allowNull: false
         },
+        IsSendSms:{
+          type: DataTypes.BOOLEAN,
+          allowNull: false
+        }
         
     }, {
     timestamps: false,

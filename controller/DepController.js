@@ -1,6 +1,50 @@
 const DepModel = require('../models/L_DepModels')
 
 class DepModelController {
+
+   static async selectSmsAccounts(ctx)
+   {
+       const data=ctx.request.body
+       console.log(data)
+       const Accounts=await DepModel.selectDepAccounts(data.DepID);
+       console.log(Accounts);
+     if(Accounts.rows[0].ApID)
+     {
+        ctx.body={           
+            code:1
+        }
+     }
+     else
+     {
+        ctx.body={           
+            code:0
+        } 
+     }
+       
+      
+   }
+   static async updateSmsCount(ctx)
+   {
+       const data=ctx.request.query
+
+       let result=await DepModel.UpdateDepSmsCount(data);
+       console.log(result)
+       ctx.body={
+           result
+       }
+   }
+
+    static async selectDepSmsCount(ctx)
+    {
+        const data=ctx.request.body
+        console.log(data)
+        let arr=data
+        console.log(arr);
+    const depcount=await DepModel.Select_SmsCountByDepID(arr)
+      ctx.body={
+        depcount
+      }
+    }
     static async SelectDepslistsbyLike(ctx)
     {
         const data=ctx.request.query
@@ -25,10 +69,7 @@ class DepModelController {
 
             }  
             console.log(list);
-        }
-      
-
-    
+        }    
     }
 
     static async selectAll_DepartmentByPermission_Key(ctx)
@@ -173,11 +214,18 @@ static async QueryFindCountAllDEP(ctx)
         obj.PID=a.PID
         obj.status=a.status
         obj.Number='NULL'
-
+        obj.smsCount=a.smsCount
+            console.log(obj);
         const depflag=await DepModel.select_DepartmentByDEPName(a.DepFullName)
        if(!depflag)
        {
-        const result=await DepModel.Add_Department(obj)
+        const result=await DepModel.Add_Department(obj)  
+         if(result.DepartmentId)   
+         {           
+            await DepModel.Add_SmsDep({DepID:result.DepartmentId,SMSCount:obj.smsCount})
+         }   
+                    
+        console.log(result);
         ctx.body={
             code:1,
             res:obj,

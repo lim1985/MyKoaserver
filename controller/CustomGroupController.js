@@ -1,6 +1,42 @@
 const CustomGroupModel = require('../models/L_ReferenceGroupModel')
 
 class CustomGroupModelController {
+
+
+    static async sortCustomGroupUsers(ctx)
+    {
+        const data=ctx.request.body
+        const _arrLength=data.length;
+        const _data=data.data;
+        let count=0
+        console.log(data)
+        console.log(_data)
+        console.log(_arrLength)
+       for(let x=0;x<=_arrLength-1;x++)
+       {
+        let i=await CustomGroupModel.CustomGroupUserSort(_data[x]);
+   
+         if(i==1)
+         {
+           console.log(i)
+           count+=parseInt(i)
+           console.log(count)
+         }
+       }
+       
+       if(count==_arrLength)
+        {
+            ctx.body={
+                code:1,
+                msg:'SortSuccess'
+            }
+        }
+      
+            // CustomGroupModel.CustomGroupUserSort(ctx)
+
+    }
+
+
     static async DeleteGroupByGroupID(ctx)
     {
         const data=ctx.request.query;
@@ -36,7 +72,17 @@ class CustomGroupModelController {
         const offset=(pageNo-1) * pageSize
         // console.log(typeof(offset))
         const limit=pageSize * 1
-        const userlist=await CustomGroupModel.FindAllUsersByGroupID({GroupID:res.GroupID, offset:offset,limit: limit })
+        let userlist
+        console.log(res)
+        if(res.UserName)
+        {
+            userlist=await CustomGroupModel.FindAllUsersByGroupIDAndLikeUserName({UserName:res.UserName,GroupID:res.GroupID, offset:offset,limit: limit })
+        }
+        else
+        {
+            userlist=await CustomGroupModel.FindAllUsersByGroupID({GroupID:res.GroupID, offset:offset,limit: limit })
+        }
+        
         console.log(`-----------------------------------`)
         console.log(userlist)
         const result={

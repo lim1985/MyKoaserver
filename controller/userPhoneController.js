@@ -3,7 +3,32 @@ const DepModel = require('../models/L_DepModels')
 const referenceUserModel = require('../models/L_ReferenceUserModel')
 //
 class UserPhoneController {
+   static async ChangeDepToQita(ctx)
+   {
+     const data=ctx.request.query
+        //data={UID:1024}
+        if(data)
+        {
 
+            let result=await userPhoneModel.ChageUsersToQita(data)
+            console.log(result)
+            if(result.code==-1)
+            {
+                ctx.body={
+                    code:-1,
+                    msg:result.msg
+                }
+            }
+            else
+            {
+                ctx.body={
+                    code:1,
+                    msg:'删除成功'
+                }
+            }
+        }
+
+   }
 
     static async sortUserPhoneList(ctx)
     {
@@ -18,8 +43,7 @@ class UserPhoneController {
               data.forEach(item=>{
                   console.log(item);
                 userPhoneModel.SortUserByDepID(item).then(res=>{ 
-                    // console.log(res)                  
-                  
+                    // console.log(res)  
                      if(res[0]==1)
                      {
                         _count--
@@ -420,7 +444,7 @@ static async AdduserPhones(ctx)
  {
      const data=ctx.request.query
      console.log(data)
-     let pages=JSON.parse(data.parameter);  
+     let pages=data
      const pageNo=pages.pageNo       
      const pageSize=pages.pageSize
      const offset=(pageNo-1) * pageSize     
@@ -457,20 +481,13 @@ static async AdduserPhones(ctx)
  static async GetUserInformationByUserNameLIke(ctx)
  {
     const data=ctx.request.query     
-    console.log(data.parameter )
-    let pages
-    let pageNo
-    let pageSize
-    if(data.parameter)
-    {
-        pages=JSON.parse(data.parameter);  
-        pageNo=pages.pageNo       
-        pageSize=pages.pageSize
-    }
-    pageNo=1;
-    pageSize=10;   
-    const offset=(pageNo-1) * pageSize     
-    const limit=pageSize * 1   
+    console.log(data )
+    let pages=data
+    let pageNo =pages.pageNo
+    let pageSize=pages.pageSize  
+ 
+    let offset=(pageNo-1) * pageSize     
+    let limit=pageSize * 1   
     let result  
     let obj=new Object();
     obj.username=data.data;
@@ -496,13 +513,6 @@ static async AdduserPhones(ctx)
      }  
      else
      {
-
-
-        // pageNo:pageNo*1,
-        // pageSize:pageSize*1,
-        // data:_phoneUserList,
-        // totalCount:count,
-        // totalPage:parseInt(count/pageSize)
 
         const res={
             pageNo:pageNo*1,

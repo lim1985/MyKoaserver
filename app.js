@@ -84,7 +84,7 @@ app.use(session)                               //  /api/login 参考的配置Get
 
 
 
-// app.use(koajwt({secret: secret.sign}).unless({path: [/^\/api\/GetCode/,/^\/api\/login/,  /^\/api\/GetVerificatCode/,/^\/api\/createUser/]}))//正常可用的配置
+//  app.use(koajwt({secret: secret.sign}).unless({path: [/^\/api\/GetCode/,/^\/api\/login/,  /^\/api\/GetVerificatCode/,/^\/api\/createUser/]}))//正常可用的配置
 
 //错误的例子 app.use(jwt({secret: secret.sign}).unless({path: [/^http\:\/\/127\.0\.0\.1\:3001\/api\/login/, /^\/api\/createUser/]}))
 // app.use(function(ctx, next){

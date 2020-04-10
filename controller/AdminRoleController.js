@@ -124,7 +124,7 @@ static groupifyWithArrayAndQC(arr) {
           },             
          ] 
     }
-    if(!userinfo.RolesID)
+    if(!userinfo.RolesID)//如果没有权限，就返回不带权限的默认路由表
     {
         ctx.body={
             DyNamicRoutes
@@ -133,15 +133,15 @@ static groupifyWithArrayAndQC(arr) {
     }
     let roles=userinfo.RolesID.split("|")
     console.log(roles);
-    let _routes=await PermissionModel.GetDynamicRoutes(roles)
+    let _routes=await PermissionModel.GetDynamicRoutes(roles)//根据不同权限返回管理节点栏目
     let _arr=[]
     let Permission_Key
     let _Arrchilds=[]    
-    _Arrchilds= RolesController.groupifyWithArrayAndQC(_routes)
+    _Arrchilds= RolesController.groupifyWithArrayAndQC(_routes)//进行分组去重
     _Arrchilds.forEach(v=>{
         let _routesObj=new Object();
         let _subroutes=[]
-        if(v.IsParent )
+        if(v.IsParent)
         {
             _routesObj={
                 path:'/list/'+v.Permission_key,
@@ -149,35 +149,12 @@ static groupifyWithArrayAndQC(arr) {
                 // redirect: {name:'Phonelist_'+v.Permission_key},
                 component: 'PageView',
                 meta: { title: v.Permission_name, icon: 'dashboard', permission: [ v.Permission_key ] },                
-            }
-
-            // {
-            //     component: RouteView,
-            //     path: '/list/QWZZB',
-            //     name: 'QWZZB',
-            //     redirect: {name:'Phonelist_QWZZB'},
-            //     meta: { title: '区委组织部', permission: [ 'QWZZB' ] },
-            //     children:[
-            //       {
-                 
-            //         path: '/list/UserPhonelist/91',
-            //         name: 'Phonelist_QWZZB',
-            //         component: () => import('@/views/list/UserPhonelist'),
-            //         meta: { title: '通信录', permission: [ 'QWZZB' ] }
-            //       },
-            //       {
-            //         path: '/list/CustomGroup/91',          
-            //         name: 'CustomGroup_QWZZB',
-            //         component: () => import('@/views/other/customgroup'),
-            //         meta: { title: '自定义组', permission: [ 'QWZZB' ] }
-            //       } 
-            //     ]
-            //   },  
+            } 
             if(v.children)
             {
                 v.children.forEach(sub=>{
                 let _subroutesObj={}
-                if(v.children.length>1)
+                if(v.children.length>1)//有子元素的情况下
                 {                 
               
                      _subroutesObj={
@@ -198,16 +175,26 @@ static groupifyWithArrayAndQC(arr) {
                             name: 'CustomGroup_'+ sub['Perinformation.Deps.UploadDir'],
                             component:'Cusomgroup',
                             meta: { title: '自定义组', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
-                            }
-                            //  ,
-                            // {
-                            //     path: '/list/yqdata/'+sub['Perinformation.Deps.DepartmentId'],          
-                            //     name: 'yqdata_'+ sub['Perinformation.Deps.UploadDir'],
-                            //     component:'yqdata',
-                            //     meta: { title: '人员数据', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
-                            // }
+                            },
+                            {
+                            path: '/list/smsrecord/'+sub['Perinformation.Deps.DepartmentId'],          
+                            name: 'Smsrecord_'+ sub['Perinformation.Deps.UploadDir'],
+                            component:'smsrecord',
+                            meta: { title: '短信信箱', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            }                           
                         ]
                     }
+                        if(sub['Perinformation.Deps.DepartmentId']==84)//乡镇系统的栏目节点
+                        {
+                            let yqdata=
+                            {
+                                path: '/list/meeting/'+sub['Perinformation.Deps.DepartmentId'],          
+                                name: 'meeting_'+ sub['Perinformation.Deps.UploadDir'],
+                                component:'meeting',
+                                meta: { title: '会议管理', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            }
+                            _subroutesObj.children.push(yqdata)
+                        }
                          if(sub.Permission_key=='QXZ_XT')//乡镇系统的栏目节点
                         {
                             let yqdata=
@@ -309,12 +296,17 @@ static groupifyWithArrayAndQC(arr) {
                         },
                         {
                           path: '/list/CustomGroup/'+sub['Perinformation.Deps.DepartmentId'],          
-                          name: 'CustomGroup_'+sub['Perinformation.Deps.UploadDir'],
-                          
+                          name: 'CustomGroup_'+sub['Perinformation.Deps.UploadDir'],                          
                           component:'Cusomgroup',
                           // component: () => import('@/views/other/customgroup'),
                           meta: { title: '自定义组', permission: [   sub['Perinformation.Deps.UploadDir']] }
-                        },                        
+                        },
+                            {
+                            path: '/list/smsrecord/'+sub['Perinformation.Deps.DepartmentId'],          
+                            name: 'Smsrecord_'+ sub['Perinformation.Deps.UploadDir'],
+                            component:'smsrecord',
+                            meta: { title: '短信信箱', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            }                      
                       ]
                         if(sub.Permission_key=='QXZ_XT')//乡镇系统的栏目节点
                         {
@@ -326,6 +318,17 @@ static groupifyWithArrayAndQC(arr) {
                                 meta: { title: '人员数据', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
                             }
                             _subroutes.push(yqdata)
+                        }
+                        if(sub['Perinformation.Deps.DepartmentId']==84)//乡镇系统的栏目节点
+                        {
+                            let meeting=
+                            {
+                                path: '/list/meeting/'+sub['Perinformation.Deps.DepartmentId'],          
+                                name: 'meeting_'+ sub['Perinformation.Deps.UploadDir'],
+                                component:'meeting',
+                                meta: { title: '会议管理', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            }
+                            _subroutes.push(meeting)
                         }
                 }
                    

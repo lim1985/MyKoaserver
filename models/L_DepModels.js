@@ -385,8 +385,63 @@ static async select_DepartmentByDEPName(s)
           }
         })
   }
+   //更新单位发短信账号信息根据部门ID DepID
+  /**
+   * 
+   * @param {*} s 
+   * @param {*} DepID 
+   */
+  static async updateDepAccounts(data)
+  {
+    return new Promise(async(resolve,reject)=>{
+      try {
+        let res=await DepSmsAccouts.update(data,{
+          where:{
+            ID:data.ID,
+            DepID:data.DepID
+          }
+        })        
+        console.log(res);
+        if(res[0]==1)
+        { 
+          resolve({code:res[0],
+          msg:'修改成功'});
+        }
 
+           
+      }catch (error)
+       {
+        reject(error)
+       }     
+    })
+  }
 
+  //新增单位发短信账号信息根据部门ID DepID
+  /**
+   * 
+   * @param {*} s 
+   * @param {*} DepID 
+   */
+  static async AddDepAccounts(data)
+  {
+    return new Promise(async(resolve,reject)=>{
+      try {
+        let res=await DepSmsAccouts.create(data)
+        console.log(res);
+            if(res.ID)
+            {
+              resolve({code:1,
+                msg:'插入数据成功'});
+            }
+          
+      } catch (error) {
+        reject(error)
+
+      }     
+    })
+  }
+
+//查询单位发短信账号信息根据部门ID DepID
   /**
    * 
    * @param {*} s 
@@ -399,6 +454,7 @@ static async select_DepartmentByDEPName(s)
         DEP.findAndCountAll({
             attributes:[
               'DepartmentId',
+              Sequelize.col('DepSmsAccouts.ID'),
               Sequelize.col('DepSmsAccouts.ApID'),
               Sequelize.col('DepSmsAccouts.Password'),
               Sequelize.col('DepSmsAccouts.Sign'),   

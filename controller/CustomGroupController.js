@@ -31,9 +31,6 @@ class CustomGroupModelController {
                 msg:'SortSuccess'
             }
         }
-      
-            // CustomGroupModel.CustomGroupUserSort(ctx)
-
     }
 
 
@@ -81,8 +78,7 @@ class CustomGroupModelController {
         else
         {
             userlist=await CustomGroupModel.FindAllUsersByGroupID({GroupID:res.GroupID, offset:offset,limit: limit })
-        }
-        
+        }        
         console.log(`-----------------------------------`)
         console.log(userlist)
         const result={
@@ -91,18 +87,11 @@ class CustomGroupModelController {
         data:userlist.rows,
         totalCount:userlist.count,
         totalPage:parseInt(userlist.count/pageSize)
-                    }
+         }
        ctx.body={
            code:1,
            result:result
        }
-        // console.log(data)
-        // const res= await CustomGroupModel.FindAllUsersByGroupID(data)
-        // ctx.body={
-        //     result:data,
-        //     res:res
-        // }
-        // console.log(res)
     }
 
     static async GetUserByGroupID(ctx)
@@ -116,7 +105,59 @@ class CustomGroupModelController {
             }
         }
     }
-    static async AddUsersToGroup(ctx)
+    static async isexist(ctx)
+    {
+        let data=ctx.request.query;
+        const isExist=await CustomGroupModel.GetUserByGroupIdAndUserId(data);
+         if(JSON.stringify(isExist)=='[]')
+        {
+            ctx.body={
+                code:-1
+            }
+        }
+        else
+        {
+            ctx.body={
+                code:1
+            }
+        }
+    }
+    static async NewaddUsersToGroup(ctx)
+    {
+        let data =ctx.request.body
+        console.log(data.lenght)
+        if(JSON.stringify(data)=='[]')
+        {
+            console.log(`数组为空`)
+        }
+        else
+        {
+                  const res=await CustomGroupModel.addUsersToGroup(data)
+            console.log(res)
+            if(res)
+            {   
+                ctx.body={
+                    code:1,
+                    data:res
+                }   
+            }
+        }
+        
+        // if(data.lenght>0)
+        // {
+        //     const res=await CustomGroupModel.addUsersToGroup(data)
+        //     console.log(res)
+        //     if(res)
+        //     {   
+        //         ctx.body={
+        //             code:1,
+        //             data:res
+        //         }   
+        //     }
+        // }
+
+    }
+    static async AddUsersToGroup(ctx)//将弃用
     {
         let data=ctx.request.body
        
@@ -146,7 +187,6 @@ class CustomGroupModelController {
          }
          else
          { 
-
             //   let _arr= data.UIDS.map(item=>{
             // return {GroupID:data.GroupID,UID:item.UID}})
              let res= await CustomGroupModel.addUserToGroup(data);

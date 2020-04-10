@@ -121,19 +121,21 @@ class UsersPhoneModel {
 static async GetAllPhoneUserReferencUserByDepID(s)
 {
 
-let sql= `SELECT   LIM_ResferenceAndDep.status AS Rstatus, LIM_UsersPhone.ID, LIM_UsersPhone.UserName, LIM_UsersPhone.Tel, 
-                LIM_UsersPhone.H_Tel, LIM_UsersPhone.cellphone, LIM_UsersPhone.H_cellphone, LIM_UsersPhone.QQ, 
-                LIM_UsersPhone.avatar, LIM_UsersPhone.BirthDay, LIM_UsersPhone.Type, LIM_UsersPhone.OrderID, 
-                LIM_UsersPhone.Sex, LIM_UsersPhone.GroupID, LIM_UsersPhone.Department_ID, LIM_UsersPhone.Permission_Key, 
-                LIM_UsersPhone.inTime, LIM_UsersPhone.status AS Ustatus, LIM_UsersPhone.UJOB, LIM_UsersPhone.Email, 
-                LIM_UsersPhone.Py_Index, LIM_Department_1.DepartmentName, 
-                LIM_Department_1.Permission_Key AS Permissionkey, LIM_ResferenceAndDep.ID AS ResID
-FROM      LIM_UsersPhone INNER JOIN
-                LIM_ResferenceAndDep ON LIM_UsersPhone.ID = LIM_ResferenceAndDep.UserPhoneID INNER JOIN
-                LIM_Department ON LIM_ResferenceAndDep.DepID = LIM_Department.DepartmentId INNER JOIN
-                LIM_Department AS LIM_Department_1 ON LIM_UsersPhone.Department_ID = LIM_Department_1.DepartmentId
-WHERE   (LIM_Department.DepartmentId =  ${s.depid})
-ORDER BY LIM_ResferenceAndDep.OrderID DESC`
+ let sql=`SELECT   LIM_ResferenceAndDep.status AS Rstatus, LIM_UsersPhone.ID, LIM_UsersPhone.UserName, LIM_UsersPhone.Tel, 
+ LIM_UsersPhone.H_Tel, LIM_UsersPhone.cellphone, LIM_UsersPhone.H_cellphone, LIM_UsersPhone.QQ, 
+ LIM_UsersPhone.avatar, LIM_UsersPhone.BirthDay, LIM_UsersPhone.Type, LIM_UsersPhone.OrderID, 
+ LIM_UsersPhone.Sex, LIM_UsersPhone.GroupID, LIM_UsersPhone.Department_ID, LIM_UsersPhone.Permission_Key, 
+ LIM_UsersPhone.inTime, LIM_UsersPhone.status AS Ustatus, LIM_UsersPhone.UJOB, LIM_UsersPhone.Email, 
+ LIM_UsersPhone.Py_Index, LIM_Department_1.DepartmentName, 
+ LIM_Department_1.Permission_Key AS Permissionkey, LIM_ResferenceAndDep.ID AS ResID
+ FROM      LIM_UsersPhone INNER JOIN
+ LIM_ResferenceAndDep ON LIM_UsersPhone.ID = LIM_ResferenceAndDep.UserPhoneID INNER JOIN
+ LIM_Department ON LIM_ResferenceAndDep.DepID = LIM_Department.DepartmentId INNER JOIN
+ LIM_Department AS LIM_Department_1 ON LIM_UsersPhone.Department_ID = LIM_Department_1.DepartmentId
+WHERE   (LIM_Department.DepartmentId = ${s.depid})
+ORDER BY Ustatus desc, LIM_ResferenceAndDep.OrderID DESC OFFSET ${s.offset} ROW FETCH NEXT ${s.limit} rows only` 
+//offset limit:
+
 
 
 //  `SELECT  LIM_ResferenceAndDep.status AS Rstatus, LIM_UsersPhone.ID, LIM_UsersPhone.UserName, LIM_UsersPhone.Tel, 

@@ -26,7 +26,7 @@ module.exports = function(sequelize, DataTypes) {
           },  
         AddSerial:{
             type:DataTypes.STRING,
-            allowNull:false,         
+            allowNull:true,         
         },  
         EcName:{
             type:DataTypes.STRING,
@@ -34,11 +34,11 @@ module.exports = function(sequelize, DataTypes) {
         },  
         TemplateId:{
           type:DataTypes.STRING,
-          allowNull:false,         
+          allowNull:true,         
       },
         Params:{
           type:DataTypes.STRING,
-          allowNull:false,         
+          allowNull:true,         
       }  
 
     }, {

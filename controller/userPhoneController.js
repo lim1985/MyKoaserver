@@ -207,7 +207,7 @@ class UserPhoneController {
         }        
     });
     
-      const result={
+      const result={ 
         tempArr,
         pageNo:pageNo*1,
         pageSize:pageSize*1,
@@ -314,39 +314,7 @@ class UserPhoneController {
     static async UpdateUserPhoneinformation(ctx)
     {
         const data =ctx.request.body
-        //   console.log(data)  
-        //   { ID: 50,
-        //     status: 7,
-        //     GroupID: null,
-        //     Email: '80168611@qq.com',
-        //     UserName: '戴小军',
-        //     Permission_Key: 'QW',
-        //     Department_ID: 152,
-        //     UJOB: '临聘人员',
-        //     Tel: '0739-5388888',
-        //     H_Tel: '0739-5388888',
-        //     cellphone: '15243990016',
-        //     H_cellphone: '15243990017',
-        //     QQ: '80168611',
-        //     avatar: null,
-        //     inTime: '1558687938',
-        //     Sex: 1,
-        //     BirthDay: null,
-        //     Type: null,
-        //     OrderID: null },
-        // { ID: 50,
-        //     UserName: '戴小军',
-        //     Sex: '1',
-        //     BirthDay: null,
-        //     status: '7',
-        //     DepKeylist: [ 'QRD', 153 ],
-        //     UJOB: '临聘人员',
-        //     Tel: '0739-5388888',
-        //     cellphone: '15243990016',
-        //     H_Tel: '0739-5388888',
-        //     H_cellphone: '15243990017',
-        //     QQ: '80168611',
-        //     Email: '80168611@qq.com' }
+   
 
         const _data={
                 ID:data.ID,
@@ -500,7 +468,7 @@ static async AdduserPhones(ctx)
          console.log(result)
      } 
      else
-     {
+     {        
          result=await userPhoneModel.findUserByusernamelike(obj)  
      }
 

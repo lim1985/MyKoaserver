@@ -11,7 +11,8 @@ class DepModelController {
      if(Accounts.rows[0].ApID)
      {
         ctx.body={           
-            code:1
+            code:1,
+            res:Accounts.rows[0]
         }
      }
      else
@@ -242,7 +243,7 @@ static async QueryFindCountAllDEP(ctx)
        }  
     }
 
-    static  async GetDepartmentByID(ctx)
+    static async GetDepartmentByID(ctx)
     {
         const data=ctx.request.query  
         console.log(data.ID)   
@@ -279,8 +280,7 @@ static async QueryFindCountAllDEP(ctx)
         {
             ctx.body={
                 code:-1
-            }
-            
+            }            
         }
         else
         {

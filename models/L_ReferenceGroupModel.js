@@ -62,8 +62,7 @@ const Op = Sequelize.Op
 class ReferenceUserModel {
 
   static async CustomGroupUserSort(data)
-  {
-   
+  {   
    return new Promise(async (resolve,resject)=>{
    const res=await GroupsUsers.update(data,{
       where:{
@@ -72,8 +71,7 @@ class ReferenceUserModel {
     })
     console.log(res)
     resolve(res)   
-   })
-   
+   })   
   }
 
   static async FindAllUsersByGroupIDAndLikeUserName(s)
@@ -111,8 +109,7 @@ WHERE   (LIM_CustomGroup.GroupID = '${s.GroupID}') AND (LIM_UsersPhone.UserName 
     })
   }
   static async FindAllUsersByGroupID(s)
-  {
-    
+  {    
     const count= `SELECT count(*) as [count]
     FROM      LIM_CustomGroup INNER JOIN
                     LIM_RefereceGroupAndUserPhone ON 
@@ -120,22 +117,22 @@ WHERE   (LIM_CustomGroup.GroupID = '${s.GroupID}') AND (LIM_UsersPhone.UserName 
                     LIM_UsersPhone ON LIM_RefereceGroupAndUserPhone.UserPhoneID = LIM_UsersPhone.ID
     WHERE   (LIM_CustomGroup.GroupID ='${s.GroupID}')`
 
-const sql=`SELECT   LIM_CustomGroup.GroupName, LIM_UsersPhone.UserName, LIM_UsersPhone.ID, 
-LIM_UsersPhone.Tel, LIM_UsersPhone.H_Tel, LIM_UsersPhone.cellphone, 
-LIM_UsersPhone.H_cellphone, LIM_UsersPhone.QQ, LIM_UsersPhone.avatar, LIM_UsersPhone.BirthDay, 
-LIM_UsersPhone.Type, LIM_UsersPhone.OrderID, LIM_UsersPhone.Sex, LIM_UsersPhone.GroupID, 
-LIM_UsersPhone.Department_ID, LIM_UsersPhone.Permission_Key, LIM_UsersPhone.inTime, LIM_UsersPhone.status, 
-LIM_UsersPhone.UJOB, LIM_UsersPhone.Email, LIM_UsersPhone.Py_Index, LIM_CustomGroup.GroupID AS CustomGroupID, 
-LIM_Department.DepartmentName, LIM_Department.DepartmentId, 
-LIM_RefereceGroupAndUserPhone.OrderID AS OrderID,
-LIM_RefereceGroupAndUserPhone.ID AS ResGroupID
-FROM      LIM_CustomGroup INNER JOIN
-LIM_RefereceGroupAndUserPhone ON 
-LIM_CustomGroup.GroupID = LIM_RefereceGroupAndUserPhone.GroupID INNER JOIN
-LIM_UsersPhone ON LIM_RefereceGroupAndUserPhone.UserPhoneID = LIM_UsersPhone.ID INNER JOIN
-LIM_Department ON LIM_UsersPhone.Department_ID = LIM_Department.DepartmentId
-WHERE   (LIM_CustomGroup.GroupID ='${s.GroupID}')
-ORDER BY LIM_RefereceGroupAndUserPhone.OrderID desc`
+    const sql=`SELECT   LIM_CustomGroup.GroupName, LIM_UsersPhone.UserName, LIM_UsersPhone.ID, 
+    LIM_UsersPhone.Tel, LIM_UsersPhone.H_Tel, LIM_UsersPhone.cellphone, 
+    LIM_UsersPhone.H_cellphone, LIM_UsersPhone.QQ, LIM_UsersPhone.avatar, LIM_UsersPhone.BirthDay, 
+    LIM_UsersPhone.Type, LIM_UsersPhone.OrderID, LIM_UsersPhone.Sex, LIM_UsersPhone.GroupID, 
+    LIM_UsersPhone.Department_ID, LIM_UsersPhone.Permission_Key, LIM_UsersPhone.inTime, LIM_UsersPhone.status, 
+    LIM_UsersPhone.UJOB, LIM_UsersPhone.Email, LIM_UsersPhone.Py_Index, LIM_CustomGroup.GroupID AS CustomGroupID, 
+    LIM_Department.DepartmentName, LIM_Department.DepartmentId, 
+    LIM_RefereceGroupAndUserPhone.OrderID AS OrderID,
+    LIM_RefereceGroupAndUserPhone.ID AS ResGroupID
+    FROM      LIM_CustomGroup INNER JOIN
+    LIM_RefereceGroupAndUserPhone ON 
+    LIM_CustomGroup.GroupID = LIM_RefereceGroupAndUserPhone.GroupID INNER JOIN
+    LIM_UsersPhone ON LIM_RefereceGroupAndUserPhone.UserPhoneID = LIM_UsersPhone.ID INNER JOIN
+    LIM_Department ON LIM_UsersPhone.Department_ID = LIM_Department.DepartmentId
+    WHERE   (LIM_CustomGroup.GroupID ='${s.GroupID}')
+    ORDER BY LIM_RefereceGroupAndUserPhone.OrderID desc`
 
       return new Promise(async(resolve,reject)=>{
       let res={}
@@ -185,6 +182,20 @@ ORDER BY LIM_RefereceGroupAndUserPhone.OrderID desc`
       }
     })
     
+    return Users
+  }
+  static async GetUserByGroupIdAndUserId(s)
+  {
+   const Users=await GroupsUsers.findAll({
+      where: {
+        GroupID:s.GroupID,//string nvchar50
+        UserPhoneID:s.UserPhoneID
+       //string nvchar50
+      }
+    })
+    // console.log(Users)
+   
+    // console.log(Users)
     return Users
   }
       static async InitGroup(s)

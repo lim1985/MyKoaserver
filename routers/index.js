@@ -13,12 +13,18 @@ const ErrorInformation = require('../controller/ErrOrInformationController')
 const PersonInformation = require('../controller/PersonInformationController')
 const SMSAccount = require('../controller/SMSAccountController')
 const meetingController = require('../controller/meetingController')
+const PhoneRecordController = require('../controller/PhoneRecordController')
 // const ListController = require('../controllers/list')
 const router = new Router({
   prefix: '/api'
 })
 
 router
+//电话记录模块
+ .post('/createPhoneRecord',PhoneRecordController.addPhoneRecord)
+ .get('/GetRecordList',PhoneRecordController.GetRecoredListByDepID)
+
+ 
 //会议管理系统
  .get('/selectmeetingByID',meetingController.getMeetingByID)//获取会议详细信息by meetingID
  .get('/selectmeetingByDepID',meetingController.getMeetingByDepID)//获取会议详细信息by meetingID
@@ -112,6 +118,9 @@ router
   .get('/GetAllByDepID',UserPhonelistController.GetAllByDepID)
   .get('/DeleteUser',UserPhonelistController.DeleteUsers)
   .get('/GetuserInformationbyTelNum',UserPhonelistController.GetuserInformationbyTelNum)
+  .get('/GetUserInfoByTelOrPhoneNum',UserPhonelistController.GetUserInfoByTelOrPhoneNum)//家庭/办公手机/座机查询接口
+
+  
   .get('/GetuserInformationbyname',UserPhonelistController.GetuserInformationbyUsername)
   .get('/GetUserInformationByUserNameLIke',UserPhonelistController.GetUserInformationByUserNameLIke)
   .get('/ChangeToQita',UserPhonelistController.ChangeDepToQita)

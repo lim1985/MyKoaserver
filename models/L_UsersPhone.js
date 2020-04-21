@@ -313,6 +313,56 @@ static async GetUserPhoneByDepID(s)
         return PhoneUserList    
         //可以用end   
  }
+ /**
+   * 查询用户信息
+   * @param name  姓名
+   * @returns {Promise.<*>}
+   */
+  static async NewfindUserByTelorPhoneNum (s) {
+    const userInfo = await UsersPhone.findOne({      
+      as:'Users',
+       raw: true,
+      attributes:[
+            'Email',
+            'QQ',
+            'status',
+            'UserName',
+            'UJOB',
+            'Tel',
+            'OrderID',
+            'ID',
+            'cellphone',
+            'H_Tel',
+            // Sequelize.col('ResferecDep.Abbreviation'),//内容
+            // Sequelize.col('ResferecDep.Abbreviation'),//内容                       
+    ],
+      where: {
+        [Op.or]: [
+           { H_Tel : s.tel },
+           { Tel : s.tel },
+           { cellphone : s.tel },
+           { H_cellphone: s.tel }
+        ],      
+     },
+     include:[
+      {      
+        model:Deps,
+        as:'ResferecDep',
+        through: {
+          where:{
+            status:-1
+          },
+          attributes:[]        
+        }, 
+    attributes:[
+       'Abbreviation',
+       'DepartmentName'
+    ], 
+   }
+    ]
+    })
+    return userInfo
+  }
   /**
    * 查询用户信息
    * @param name  姓名
@@ -379,8 +429,7 @@ static async GetUserPhoneByDepID(s)
       as:'Users',
       raw: true,
   
-      attributes:[
-                      // 'Abbreviation',
+      attributes:[     // 'Abbreviation',
                       // 'DepartmentId',
                       // 'Permission_Key',
                       // 'Priority',
@@ -462,8 +511,7 @@ static async GetUserPhoneByDepID(s)
               // UserName : s.username 
               UserName: {
                 // 模糊查询
-                [Op.like]:'%' +s.username  + '%',
-           
+                [Op.like]:'%' +s.username  + '%',           
               },
               Department_ID:s.DepID
             },

@@ -408,6 +408,30 @@ static async AdduserPhones(ctx)
     }
    }
 }
+
+static async GetUserInfoByTelOrPhoneNum(ctx)
+{
+    const data=ctx.request.query
+    console.log(data)
+    let obj=new Object();
+    obj.tel=data.tel
+    const result=await userPhoneModel.NewfindUserByTelorPhoneNum(obj)  
+    if(!result)
+    {
+        ctx.body={
+            code:-1
+        }
+    }
+    else
+    {
+        ctx.body={
+            code:1,
+            isNum:true,
+            res:result
+          }
+    }
+}
+
  static async GetuserInformationbyTelNum(ctx)
  {
      const data=ctx.request.query
@@ -481,7 +505,6 @@ static async AdduserPhones(ctx)
      }  
      else
      {
-
         const res={
             pageNo:pageNo*1,
             pageSize:pageSize*1,

@@ -168,20 +168,26 @@ static groupifyWithArrayAndQC(arr) {
                             path: '/list/UserPhonelist/'+sub['Perinformation.Deps.DepartmentId'],
                             name: 'Phonelist_'+ sub['Perinformation.Deps.UploadDir'],
                             component:'TableList',
-                            meta: { title: '通信录', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            meta: { icon: 'solution' ,title: '通信录', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
                             },
                             {
                             path: '/list/CustomGroup/'+sub['Perinformation.Deps.DepartmentId'],          
                             name: 'CustomGroup_'+ sub['Perinformation.Deps.UploadDir'],
                             component:'Cusomgroup',
-                            meta: { title: '自定义组', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            meta: { icon: 'team' ,title: '自定义组', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
                             },
                             {
                             path: '/list/smsrecord/'+sub['Perinformation.Deps.DepartmentId'],          
                             name: 'Smsrecord_'+ sub['Perinformation.Deps.UploadDir'],
                             component:'smsrecord',
-                            meta: { title: '短信信箱', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
-                            }                           
+                            meta: { icon: 'mail' , title: '短信信箱', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            } ,
+                            {
+                                path: '/list/phonerecord_/'+sub['Perinformation.Deps.DepartmentId'],          
+                                name: 'phonerecord_'+ sub['Perinformation.Deps.UploadDir'],
+                                component:'phonerecord',
+                                meta: { icon: 'phone' , title: '电话记录', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                            }                          
                         ]
                     }
                         if(sub['Perinformation.Deps.DepartmentId']==84)//乡镇系统的栏目节点
@@ -292,21 +298,27 @@ static groupifyWithArrayAndQC(arr) {
                           name: 'Phonelist_'+ sub['Perinformation.Deps.UploadDir'] ,
                           // component: () => import('@/views/list/UserPhonelist'),
                           component:'TableList',
-                          meta: { title: '通信录', permission: [  sub['Perinformation.Deps.UploadDir']  ] }
+                          meta: { icon: 'solution',title: '通信录', permission: [  sub['Perinformation.Deps.UploadDir']  ] }
                         },
                         {
                           path: '/list/CustomGroup/'+sub['Perinformation.Deps.DepartmentId'],          
                           name: 'CustomGroup_'+sub['Perinformation.Deps.UploadDir'],                          
                           component:'Cusomgroup',
                           // component: () => import('@/views/other/customgroup'),
-                          meta: { title: '自定义组', permission: [   sub['Perinformation.Deps.UploadDir']] }
+                          meta: {icon: 'team' , title: '自定义组', permission: [   sub['Perinformation.Deps.UploadDir']] }
                         },
-                            {
-                            path: '/list/smsrecord/'+sub['Perinformation.Deps.DepartmentId'],          
-                            name: 'Smsrecord_'+ sub['Perinformation.Deps.UploadDir'],
-                            component:'smsrecord',
-                            meta: { title: '短信信箱', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
-                            }                      
+                        {
+                        path: '/list/smsrecord/'+sub['Perinformation.Deps.DepartmentId'],          
+                        name: 'Smsrecord_'+ sub['Perinformation.Deps.UploadDir'],
+                        component:'smsrecord',
+                        meta: {icon: 'mail' , title: '短信信箱', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                        },
+                        {
+                            path: '/list/phonerecord_/'+sub['Perinformation.Deps.DepartmentId'],          
+                            name: 'phonerecord_'+ sub['Perinformation.Deps.UploadDir'],
+                            component:'phonerecord',
+                            meta: { icon: 'phone' , title: '电话记录', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                        }                       
                       ]
                         if(sub.Permission_key=='QXZ_XT')//乡镇系统的栏目节点
                         {

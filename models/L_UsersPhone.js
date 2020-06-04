@@ -164,7 +164,6 @@ return new Promise(async(resolve)=>{
   resolve(res)
 }).then(r=>{
   console.log('返回数据成功！')
-
   console.log(r)
   return r
   
@@ -624,7 +623,7 @@ static async GetUserPhoneByDepID(s)
     const UsersPhonelist = await UsersPhone.findAndCountAll(
       {     
         order:[
-        ['ID', 'DESC'],],       
+        ['ID', 'DESC'],],          
       }
           //{ offset: 0, limit: 10 },
      )

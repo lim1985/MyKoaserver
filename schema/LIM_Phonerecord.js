@@ -10,27 +10,27 @@ module.exports = function(sequelize, DataTypes) {
           },          
         UserName:{
             type:DataTypes.STRING,
-              allowNull:false,             
+              allowNull:true,             
             },  
         PhoneNum:{
               type:DataTypes.STRING,
-                allowNull:false,             
+                allowNull:true,             
               }, 
         DepName:{
           type:DataTypes.STRING,
-          allowNull:false,             
+          allowNull:true,             
                 },   
         DepID:{
                type:DataTypes.INTEGER,
-               allowNull:false,         
+               allowNull:true,         
                 },
         status:{
           type:DataTypes.INTEGER,
-          allowNull:false,         
+          allowNull:true,         
         },
         recordUrl:{
           type:DataTypes.STRING,
-          allowNull:false,             
+          allowNull:true,             
                 }, 
         
         Intime: {

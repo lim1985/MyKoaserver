@@ -2,12 +2,18 @@ const db = require('../config/db')
 const gov = db.gov
 const Phonerecord = gov.import('../schema/LIM_Phonerecord.js')
 
+
 class PhonerecordModel {
   /**
    * @param create
    */
    static async createPhoneRecored(record)
    {
+     console.log(record)
+     if(!record.PhoneNum)
+     {
+       return false
+     }
      const result=await Phonerecord.create(record)
      if(result.ID)
      {

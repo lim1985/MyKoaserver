@@ -20,7 +20,7 @@ class PhoneRecordController {
       
       if(!result)
       {
-      PhoneInfo.UserName='陌生来电'
+      PhoneInfo.UserName='陌生电话'
       PhoneInfo.UJob=''
       PhoneInfo.DepName=''
       // PhoneInfo.PhoneNum=data.PhoneNum   

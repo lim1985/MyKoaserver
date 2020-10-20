@@ -53,7 +53,7 @@ class PersonInfomationModel {
         //   where:{
         //     DepartmentId:data.jdid
         //   },    
-        //   // limit: data.limit,
+        //   //  limit:data.limit,
         //   // offset:data.offset,
         //   include:[{
         //     limit: data.limit,

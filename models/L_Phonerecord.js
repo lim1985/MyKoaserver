@@ -7,34 +7,44 @@ class PhonerecordModel {
   /**
    * @param create
    */
-   static async createPhoneRecored(record)
-   {
-     console.log(record)
-     if(!record.PhoneNum)
-     {
-       return false
-     }
-     const result=await Phonerecord.create(record)
-     if(result.ID)
-     {
-       return true
-     }
-   }
+  static async createPhoneRecored (record) {
+    console.log(record)
+    if (!record.PhoneNum) {
+      return false
+    }
+    const flag = await Phonerecord.findOne({
+      where: {
+        recordUrl: record.recordUrl
+      }
+    })
+    console.log(`记-------------录`)
+    console.log(flag)
+    if (!flag) {
+      const result = await Phonerecord.create(record)
+      if (result.ID) {
+        return true
+      }
+    }
+    else {
+      return false
+    }
 
-   /**
-    * @param select by depID
-    */
-   static async getRecoredListByDepID(data)
-   {
-     const result=await Phonerecord.findAndCount({
-       where:{
-         DepID:data.DepID
-       },
-       order:[
-        ['ID', 'DESC'],],  
-     })
-     return result
-   }
+
+  }
+
+  /**
+   * @param select by depID
+   */
+  static async getRecoredListByDepID (data) {
+    const result = await Phonerecord.findAndCount({
+      where: {
+        DepID: data.DepID
+      },
+      order: [
+        ['ID', 'DESC'],],
+    })
+    return result
+  }
   /**
    * 查询token信息
    * @param token  姓名

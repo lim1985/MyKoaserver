@@ -190,7 +190,7 @@ static groupifyWithArrayAndQC(arr) {
                             }                          
                         ]
                     }
-                        if(sub['Perinformation.Deps.DepartmentId']==84)//乡镇系统的栏目节点
+                        if(sub['Perinformation.Deps.DepartmentId']==212)//乡镇系统的栏目节点
                         {
                             let yqdata=
                             {
@@ -331,17 +331,17 @@ static groupifyWithArrayAndQC(arr) {
                             }
                             _subroutes.push(yqdata)
                         }
-                        if(sub['Perinformation.Deps.DepartmentId']==84)//乡镇系统的栏目节点
-                        {
-                            let meeting=
-                            {
-                                path: '/list/meeting/'+sub['Perinformation.Deps.DepartmentId'],          
-                                name: 'meeting_'+ sub['Perinformation.Deps.UploadDir'],
-                                component:'meeting',
-                                meta: { title: '会议管理', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
-                            }
-                            _subroutes.push(meeting)
-                        }
+                        // if(sub['Perinformation.Deps.DepartmentId']==84)//乡镇系统的栏目节点
+                        // {
+                        //     let meeting=
+                        //     {
+                        //         path: '/list/meeting/'+sub['Perinformation.Deps.DepartmentId'],          
+                        //         name: 'meeting_'+ sub['Perinformation.Deps.UploadDir'],
+                        //         component:'meeting',
+                        //         meta: { title: '会议管理', permission: [  sub['Perinformation.Deps.UploadDir'] ] }
+                        //     }
+                        //     _subroutes.push(meeting)
+                        // }
                 }
                    
           })
